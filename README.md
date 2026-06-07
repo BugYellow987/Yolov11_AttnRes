@@ -1,15 +1,16 @@
-# YOLO11 Backbone Attention Residuals 修改說明
+# YOLO11 Backbone Attention Residuals 與 FSNet 修改說明
 
-本專案將 YOLO11 detection model 的 backbone 中原本的 `C3k2` 模組替換為 `AttentionResiduals` 模組。
+本專案將 YOLO11 detection model 的 backbone 中原本的 `C3k2` 模組替換為 attention residual 相關模組。原本的 `AttentionResiduals` 模組仍保留，並另外加入 FSNet，透過 `FSAttentionResiduals` 模組的方式整合到模型中。FSNET是加入backbone中，而非neck。
 
 ## 修改內容
 
 - 模型設定檔：`ultralytics/cfg/models/11/yolo11.yaml`
 - 新增模組：`AttentionResiduals`
+- 加入 FSNet：使用 `FSAttentionResiduals` 模組整合
 - 模組位置：`ultralytics/nn/modules/block.py`
 - Parser 註冊位置：`ultralytics/nn/tasks.py`
 
-目前只替換 backbone 中的 `C3k2`，head 仍維持原本 YOLO11 的結構。
+目前只替換 backbone 中的 `C3k2`，head 仍維持原本 YOLO11 的結構；原本的 `AttentionResiduals` 仍可保留使用。
 
 ## 訓練
 

@@ -29,6 +29,8 @@ __all__ = (
     "ADown",
     "Attention",
     "AttentionResiduals",
+    "FSAttentionResiduals",
+    "FeatureShuffle",
     "BNContrastiveHead",
     "Bottleneck",
     "BottleneckCSP",
@@ -1124,6 +1126,77 @@ class AttentionResiduals(nn.Module):
         for mixer, block in zip(self.attn_res, self.blocks):
             states.append(block(mixer(states)))
         return self.cv2(self.out_attn_res(states))
+
+
+class FeatureShuffle(nn.Module):
+    """Feature shuffle mixer with a local branch and a down-up context branch."""
+
+    def __init__(self, c: int, groups: int = 2):
+        """Initialize feature shuffle mixer.
+
+        Args:
+            c (int): Number of input/output channels.
+            groups (int): Number of channel shuffle groups.
+        """
+        super().__init__()
+        self.c1 = c - c // 2
+        self.c2 = c // 2
+        self.groups = groups
+        self.context = Conv(self.c2, self.c2, 3, 1) if self.c2 else nn.Identity()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Mix local and context features, then shuffle channels."""
+        if self.c2 == 0:
+            return x
+        local, context = x.split((self.c1, self.c2), dim=1)
+        if min(context.shape[-2:]) > 1:
+            context = F.avg_pool2d(context, kernel_size=2, stride=2, ceil_mode=True)
+            context = self.context(context)
+            context = F.interpolate(context, size=local.shape[-2:], mode="nearest")
+        else:
+            context = self.context(context)
+        return self.channel_shuffle(torch.cat((local, context), dim=1), self.groups)
+
+    @staticmethod
+    def channel_shuffle(x: torch.Tensor, groups: int) -> torch.Tensor:
+        """Shuffle channels across groups."""
+        b, c, h, w = x.shape
+        if groups <= 1 or c % groups:
+            return x
+        x = x.view(b, groups, c // groups, h, w)
+        return x.transpose(1, 2).contiguous().view(b, c, h, w)
+
+
+class FSAttentionResiduals(nn.Module):
+    """Attention Residuals block with FSNet-style feature shuffle before each transform."""
+
+    def __init__(self, c1: int, c2: int, n: int = 1, e: float = 0.5, k: int = 3, groups: int = 2):
+        """Initialize an FSNet-enhanced Attention Residuals block.
+
+        Args:
+            c1 (int): Input channels.
+            c2 (int): Output channels.
+            n (int): Number of feature transformation layers.
+            e (float): Hidden channel expansion ratio.
+            k (int): Kernel size for feature transformations.
+            groups (int): Number of channel shuffle groups.
+        """
+        super().__init__()
+        c_ = int(c2 * e)
+        self.cv1 = Conv(c1, c_, 1, 1)
+        self.shuffle = nn.ModuleList(FeatureShuffle(c_, groups) for _ in range(n))
+        self.blocks = nn.ModuleList(Conv(c_, c_, k, 1) for _ in range(n))
+        self.attn_res = nn.ModuleList(AttentionResiduals2d(c_) for _ in range(n))
+        self.out_shuffle = FeatureShuffle(c_, groups)
+        self.out_attn_res = AttentionResiduals2d(c_)
+        self.cv2 = Conv(c_, c2, 1, 1)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass with feature shuffle and learned attention over feature states."""
+        states = [self.cv1(x)]
+        for shuffle, mixer, block in zip(self.shuffle, self.attn_res, self.blocks):
+            states.append(block(shuffle(mixer(states))))
+        return self.cv2(self.out_shuffle(self.out_attn_res(states)))
 
 
 class C3k2(C2f):
