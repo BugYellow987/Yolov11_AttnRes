@@ -40,6 +40,7 @@ from ultralytics.nn.modules import (
     C3x,
     CBFuse,
     CBLinear,
+    CSAR,
     Classify,
     Concat,
     Conv,
@@ -1784,6 +1785,12 @@ def parse_model(d, ch, verbose=True):
             args = [ch[f]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
+        elif m is CSAR:
+            c2 = args[0]
+            if c2 != nc:
+                c2 = make_divisible(min(c2, max_channels) * width, 8)
+            from_ch = [ch[x] for x in f] if isinstance(f, list) else [ch[f]]
+            args = [from_ch, c2, *args[1:]]
         elif m in frozenset(
             {
                 Detect,

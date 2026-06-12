@@ -29,6 +29,7 @@ __all__ = (
     "ADown",
     "Attention",
     "AttentionResiduals",
+    "CSAR",
     "FSAttentionResiduals",
     "FeatureShuffle",
     "BNContrastiveHead",
@@ -1197,6 +1198,88 @@ class FSAttentionResiduals(nn.Module):
         for shuffle, mixer, block in zip(self.shuffle, self.attn_res, self.blocks):
             states.append(block(shuffle(mixer(states))))
         return self.cv2(self.out_shuffle(self.out_attn_res(states)))
+
+
+class CSAR(nn.Module):
+    """Cross-Scale Attention Residual fusion for YOLO feature maps.
+
+    This module receives a list of feature maps, aligns them to a target feature
+    resolution, builds 1x1-conv query/key/value projections, attends over the
+    scale dimension, and adds a residual shortcut from the target feature.
+    """
+
+    def __init__(
+        self,
+        ch: list[int],
+        c2: int,
+        num_heads: int = 4,
+        target: int = -1,
+        attn_ratio: float = 0.5,
+        shortcut: bool = True,
+    ):
+        """Initialize CSAR.
+
+        Args:
+            ch (list[int]): Input channel dimensions for each source feature.
+            c2 (int): Output channels.
+            num_heads (int): Number of attention heads.
+            target (int): Source index used as query, output size, and residual.
+            attn_ratio (float): Key/query dimension ratio relative to each value head.
+            shortcut (bool): Whether to add the target feature shortcut.
+        """
+        super().__init__()
+        if not ch:
+            raise ValueError("CSAR requires at least one input feature map.")
+        self.target = target % len(ch)
+        self.num_heads = max(1, min(int(num_heads), c2))
+        while c2 % self.num_heads:
+            self.num_heads -= 1
+        self.head_dim = c2 // self.num_heads
+        self.key_dim = max(1, int(self.head_dim * attn_ratio))
+        self.scale = self.key_dim**-0.5
+
+        key_channels = self.key_dim * self.num_heads
+        self.q = Conv(ch[self.target], key_channels, 1, act=False)
+        self.k = nn.ModuleList(Conv(c, key_channels, 1, act=False) for c in ch)
+        self.v = nn.ModuleList(Conv(c, c2, 1, act=False) for c in ch)
+        self.pe = Conv(c2, c2, 3, 1, g=c2, act=False)
+        self.proj = Conv(c2, c2, 1, act=False)
+        self.shortcut = (
+            nn.Identity()
+            if shortcut and ch[self.target] == c2
+            else Conv(ch[self.target], c2, 1, act=False)
+            if shortcut
+            else None
+        )
+
+    @staticmethod
+    def _resize(x: torch.Tensor, size: tuple[int, int]) -> torch.Tensor:
+        """Resize a feature map to the target spatial size."""
+        return x if x.shape[-2:] == size else F.interpolate(x, size=size, mode="nearest")
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
+        """Fuse multi-scale features with attention over source scales."""
+        xs = [x] if isinstance(x, torch.Tensor) else list(x)
+        if len(xs) != len(self.k):
+            raise ValueError(f"CSAR expected {len(self.k)} inputs, but received {len(xs)}.")
+        ref = xs[self.target]
+        b, _, h, w = ref.shape
+        size = (h, w)
+        aligned = [self._resize(xi, size) for xi in xs]
+
+        q = self.q(ref).view(b, self.num_heads, self.key_dim, h, w)
+        k = torch.stack(
+            [proj(xi).view(b, self.num_heads, self.key_dim, h, w) for proj, xi in zip(self.k, aligned)], dim=0
+        )
+        v = torch.stack(
+            [proj(xi).view(b, self.num_heads, self.head_dim, h, w) for proj, xi in zip(self.v, aligned)], dim=0
+        )
+
+        attn = (q.unsqueeze(0) * k).sum(dim=3) * self.scale
+        attn = attn.float().softmax(dim=0).to(dtype=v.dtype)
+        y = (attn.unsqueeze(3) * v).sum(dim=0).reshape(b, self.num_heads * self.head_dim, h, w)
+        y = self.proj(y + self.pe(v[self.target].reshape(b, self.num_heads * self.head_dim, h, w)))
+        return y + self.shortcut(ref) if self.shortcut is not None else y
 
 
 class C3k2(C2f):

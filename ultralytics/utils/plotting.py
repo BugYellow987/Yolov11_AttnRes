@@ -17,6 +17,9 @@ from ultralytics.utils import IS_COLAB, IS_KAGGLE, LOGGER, TryExcept, ops, plt_s
 from ultralytics.utils.checks import check_font, check_version, is_ascii
 from ultralytics.utils.files import increment_path
 
+# CSAR_BBOX_FILL_TOGGLE: comment the next line to disable filled detection boxes.
+CSAR_BBOX_FILL_ALPHA = 0.25
+
 
 class Colors:
     """Ultralytics color palette for visualization and plotting.
@@ -320,7 +323,13 @@ class Annotator:
 
         multi_points = isinstance(box[0], list)  # multiple points with shape (n, 2)
         p1 = [int(b) for b in box[0]] if multi_points else (int(box[0]), int(box[1]))
+        fill_alpha = max(0.0, min(1.0, float(globals().get("CSAR_BBOX_FILL_ALPHA", 0.0) or 0.0)))
         if self.pil:
+            if fill_alpha and not multi_points:
+                overlay = self.im.copy()
+                ImageDraw.Draw(overlay).rectangle(box, fill=color)
+                self.im = Image.blend(self.im, overlay, fill_alpha)
+                self.draw = ImageDraw.Draw(self.im)
             self.draw.polygon(
                 [tuple(b) for b in box], width=self.lw, outline=color
             ) if multi_points else self.draw.rectangle(box, width=self.lw, outline=color)
@@ -336,6 +345,11 @@ class Annotator:
                 # self.draw.text([box[0], box[1]], label, fill=txt_color, font=self.font, anchor='ls')  # for PIL>8.0
                 self.draw.text((p1[0], p1[1] - h if outside else p1[1]), label, fill=txt_color, font=self.font)
         else:  # cv2
+            if fill_alpha and not multi_points:
+                box_p2 = (int(box[2]), int(box[3]))
+                overlay = self.im.copy()
+                cv2.rectangle(overlay, p1, box_p2, color, -1, cv2.LINE_AA)
+                cv2.addWeighted(overlay, fill_alpha, self.im, 1 - fill_alpha, 0, dst=self.im)
             cv2.polylines(
                 self.im, [np.asarray(box, dtype=int)], True, color, self.lw
             ) if multi_points else cv2.rectangle(
