@@ -1073,9 +1073,8 @@ class C3f(nn.Module):
 class AttentionResiduals2d(nn.Module):
     """Attention Residuals mixer for 2D feature maps.
 
-    This adapts depth-wise Attention Residuals to CNN feature states with shape
-    [B, C, H, W], applying a learned pseudo-query over previous states at each
-    spatial location.
+    This adapts depth-wise Attention Residuals to CNN feature states with shape [B, C, H, W], applying a learned
+    pseudo-query over previous states at each spatial location.
     """
 
     def __init__(self, c: int, eps: float = 1e-6):
