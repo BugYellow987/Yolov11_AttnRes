@@ -19,6 +19,7 @@ __all__ = (
     "C3",
     "C3TR",
     "CIB",
+    "CSAR",
     "DFL",
     "ELAN1",
     "PSA",
@@ -29,9 +30,6 @@ __all__ = (
     "ADown",
     "Attention",
     "AttentionResiduals",
-    "CSAR",
-    "FSAttentionResiduals",
-    "FeatureShuffle",
     "BNContrastiveHead",
     "Bottleneck",
     "BottleneckCSP",
@@ -45,6 +43,8 @@ __all__ = (
     "CBFuse",
     "CBLinear",
     "ContrastiveHead",
+    "FSAttentionResiduals",
+    "FeatureShuffle",
     "GhostBottleneck",
     "HGBlock",
     "HGStem",
@@ -1073,9 +1073,8 @@ class C3f(nn.Module):
 class AttentionResiduals2d(nn.Module):
     """Attention Residuals mixer for 2D feature maps.
 
-    This adapts depth-wise Attention Residuals to CNN feature states with shape
-    [B, C, H, W], applying a learned pseudo-query over previous states at each
-    spatial location.
+    This adapts depth-wise Attention Residuals to CNN feature states with shape [B, C, H, W], applying a learned
+    pseudo-query over previous states at each spatial location.
     """
 
     def __init__(self, c: int, eps: float = 1e-6):
@@ -1203,9 +1202,8 @@ class FSAttentionResiduals(nn.Module):
 class CSAR(nn.Module):
     """Cross-Scale Attention Residual fusion for YOLO feature maps.
 
-    This module receives a list of feature maps, aligns them to a target feature
-    resolution, builds 1x1-conv query/key/value projections, attends over the
-    scale dimension, and adds a residual shortcut from the target feature.
+    This module receives a list of feature maps, aligns them to a target feature resolution, builds 1x1-conv
+    query/key/value projections, attends over the scale dimension, and adds a residual shortcut from the target feature.
     """
 
     def __init__(
