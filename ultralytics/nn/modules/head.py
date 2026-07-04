@@ -409,14 +409,25 @@ class Segment26(Segment):
         if isinstance(preds, dict):  # training and validating during training
             if self.end2end:
                 preds["one2many"]["proto"] = proto
-                preds["one2one"]["proto"] = (
-                    tuple(p.detach() for p in proto) if isinstance(proto, tuple) else proto.detach()
-                )
+                preds["one2one"]["proto"] = self._detach_proto(proto)
             else:
                 preds["proto"] = proto
         if self.training:
             return preds
         return (outputs, proto) if self.export else ((outputs[0], proto), preds)
+
+    @staticmethod
+    def _detach_proto(proto):
+        """Detach proto outputs, including optional dense auxiliary dictionaries."""
+        if isinstance(proto, tuple):
+            detached = []
+            for p in proto:
+                if isinstance(p, dict):
+                    detached.append({k: v.detach() for k, v in p.items()})
+                else:
+                    detached.append(p.detach())
+            return tuple(detached)
+        return proto.detach()
 
     def fuse(self) -> None:
         """Remove the one2many head and extra part of proto module for inference optimization."""

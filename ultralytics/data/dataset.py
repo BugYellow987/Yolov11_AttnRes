@@ -232,6 +232,7 @@ class YOLODataset(BaseDataset):
                 batch_idx=True,
                 mask_ratio=hyp.mask_ratio,
                 mask_overlap=hyp.overlap_mask,
+                num_classes=int(self.data.get("nc", 0)),
                 bgr=hyp.bgr if self.augment else 0.0,  # only affect training.
             )
         )
@@ -297,7 +298,7 @@ class YOLODataset(BaseDataset):
         values = list(zip(*[list(b.values()) for b in batch]))
         for i, k in enumerate(keys):
             value = values[i]
-            if k in {"img", "text_feats", "semantic_mask", "sem_masks"}:
+            if k in {"img", "text_feats", "semantic_mask", "sem_masks", "heatmaps", "seedmaps"}:
                 value = torch.stack(value, 0)
             elif k == "visuals":
                 value = torch.nn.utils.rnn.pad_sequence(value, batch_first=True)

@@ -1,0 +1,64 @@
+# Ultralytics YOLO11 instance segmentation model with COP-Net-style SCA and PatchCSAR refinement.
+#
+# Based on yolo11-0621-2.yaml:
+# - keeps the AttentionResiduals + FSNetShuffle backbone
+# - adds SCA before cross-scale fusion
+# - uses PatchCSAR for the first cross-scale refinement stage
+# - keeps a second CSAR stage and Segment26 head for stable mask prediction
+
+# Parameters
+nc: 80 # number of classes
+scales:
+  # [depth, width, max_channels]
+  n: [0.50, 0.25, 1024]
+  s: [0.50, 0.50, 1024]
+  m: [0.50, 1.00, 512]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.50, 512]
+
+# YOLO11-FSNetShuffle backbone
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]] # 1-P2/4
+
+  - [-1, 2, AttentionResiduals, [256, 0.25]] # 2-P2/4
+  - [[1, 2], 1, FSNetShuffle, [128, 1, 2]] # 3-P2/4
+
+  - [3, 1, Conv, [256, 3, 2]] # 4-P3/8
+  - [4, 2, AttentionResiduals, [512, 0.25]] # 5-P3/8
+  - [[4, 5], 1, FSNetShuffle, [256, 1, 2]] # 6-P3/8
+
+  - [6, 1, Conv, [512, 3, 2]] # 7-P4/16
+  - [7, 2, AttentionResiduals, [512]] # 8-P4/16
+  - [[7, 8], 1, FSNetShuffle, [512, 2, 2]] # 9-P4/16
+
+  - [9, 1, Conv, [1024, 3, 2]] # 10-P5/32
+  - [10, 2, AttentionResiduals, [1024]] # 11-P5/32
+  - [[10, 11], 1, FSNetShuffle, [1024, 2, 2]] # 12-P5/32
+
+  - [-1, 1, SPPF, [1024, 5]] # 13
+  - [-1, 2, C2PSA, [1024]] # 14-P5/32
+
+# COP-Net-style SCA + PatchCSAR segmentation head
+head:
+  # Scale-aware channel refinement for P2/P3/P4/P5.
+  - [[3, 6, 9, 14], 1, SCA, [128, 0, 4, True]] # 15-P2/4 SCA refined
+  - [[3, 6, 9, 14], 1, SCA, [256, 1, 4, True]] # 16-P3/8 SCA refined
+  - [[3, 6, 9, 14], 1, SCA, [512, 2, 4, True]] # 17-P4/16 SCA refined
+  - [[3, 6, 9, 14], 1, SCA, [1024, 3, 4, True]] # 18-P5/32 SCA refined
+
+  # Patch-based cross-scale attention. FuD with 0.75 patch ratio follows the COP-Net ablation preference.
+  # - [[15, 16, 17, 18], 1, PatchCSAR, [512, 4, 1, 0.5, True, 0.75, fud]] # 19-P3/8
+  # - [[15, 16, 17, 18], 1, PatchCSAR, [512, 4, 2, 0.5, True, 0.75, fud]] # 20-P4/16
+  # - [[15, 16, 17, 18], 1, PatchCSAR, [1024, 4, 3, 0.5, True, 0.75, fud]] # 21-P5/32
+
+  - [[15, 16, 17, 18], 1, CSAR, [512, 4, 1, 0.5, True]]  # 15-P3/8 refined from P2/P3/P4/P5
+  - [[15, 16, 17, 18], 1, CSAR, [512, 4, 2, 0.5, True]]  # 16-P4/16 refined from P2/P3/P4/P5
+  - [[15, 16, 17, 18], 1, CSAR, [1024, 4, 3, 0.5, True]] # 17-P5/32 refined from P2/P3/P4/P5
+  # Standard CSAR refinement for stability and lower compute than a fully patch-based second stage.
+  - [[15, 19, 20, 21], 1, CSAR, [512, 4, 1, 0.5, True]] # 22-P3/8
+  - [[15, 19, 20, 21], 1, CSAR, [512, 4, 2, 0.5, True]] # 23-P4/16
+  - [[15, 19, 20, 21], 1, CSAR, [1024, 4, 3, 0.5, True]] # 24-P5/32
+
+  - [[22, 23, 24], 1, Segment26, [nc, 32, 256]] # 25-Segment26

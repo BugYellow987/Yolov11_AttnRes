@@ -2222,6 +2222,7 @@ class Format(BaseTransform):
         return_obb: bool = False,
         mask_ratio: int = 4,
         mask_overlap: bool = True,
+        num_classes: int = 0,
         batch_idx: bool = True,
         bgr: float = 0.0,
     ):
@@ -2238,6 +2239,7 @@ class Format(BaseTransform):
             return_obb (bool): If True, returns oriented bounding boxes.
             mask_ratio (int): Downsample ratio for masks.
             mask_overlap (bool): If True, allows mask overlap.
+            num_classes (int): Number of classes for auxiliary dense segmentation targets.
             batch_idx (bool): If True, keeps batch indexes.
             bgr (float): Probability of returning BGR images instead of RGB.
         """
@@ -2248,6 +2250,7 @@ class Format(BaseTransform):
         self.return_obb = return_obb
         self.mask_ratio = mask_ratio
         self.mask_overlap = mask_overlap
+        self.num_classes = num_classes
         self.batch_idx = batch_idx  # keep the batch indexes
         self.bgr = bgr
 
@@ -2331,6 +2334,7 @@ class Format(BaseTransform):
                 sem_masks = torch.zeros(h // self.mask_ratio, w // self.mask_ratio)
             labels["masks"] = masks
             labels["sem_masks"] = sem_masks.float()
+            labels["heatmaps"], labels["seedmaps"] = self._format_dense_targets(masks, cls, h, w)
         labels["cls"] = torch.from_numpy(cls) if nl else torch.zeros(nl, 1)
         labels["bboxes"] = torch.from_numpy(instances.bboxes) if nl else torch.zeros((nl, 4))
         if self.return_keypoint:
@@ -2352,6 +2356,47 @@ class Format(BaseTransform):
         if self.batch_idx:
             labels["batch_idx"] = torch.zeros(nl)
         return labels
+
+    def _format_dense_targets(
+        self, masks: torch.Tensor, cls: np.ndarray, h: int, w: int
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Create class-wise Gaussian heatmaps and distance-transform seedmaps from instance masks."""
+        nc = int(self.num_classes or (int(cls.max()) + 1 if len(cls) else 0))
+        mh, mw = h // self.mask_ratio, w // self.mask_ratio
+        heatmaps = np.zeros((nc, mh, mw), dtype=np.float32)
+        seedmaps = np.zeros((nc, mh, mw), dtype=np.float32)
+        if nc <= 0 or not len(cls) or masks.numel() == 0:
+            return torch.from_numpy(heatmaps), torch.from_numpy(seedmaps)
+
+        cls_ids = cls.reshape(-1).astype(np.int64)
+        instance_masks = []
+        if self.mask_overlap:
+            instance_map = masks[0].cpu().numpy().astype(np.int32) if masks.shape[0] else np.zeros((mh, mw), np.int32)
+            instance_masks = [(instance_map == (i + 1)).astype(np.uint8) for i in range(len(cls_ids))]
+        else:
+            instance_masks = [m.cpu().numpy().astype(np.uint8) for m in masks[: len(cls_ids)]]
+
+        yy, xx = np.ogrid[:mh, :mw]
+        for class_id, mask in zip(cls_ids, instance_masks):
+            if class_id < 0 or class_id >= nc or mask.max() == 0:
+                continue
+            ys, xs = np.nonzero(mask)
+            if len(xs) == 0:
+                continue
+
+            x1, x2, y1, y2 = xs.min(), xs.max(), ys.min(), ys.max()
+            cx, cy = xs.mean(), ys.mean()
+            sigma = max(1.0, min(x2 - x1 + 1, y2 - y1 + 1) * 0.25)
+            gaussian = np.exp(-((xx - cx) ** 2 + (yy - cy) ** 2) / (2 * sigma**2)).astype(np.float32)
+            gaussian *= mask
+            heatmaps[class_id] = np.maximum(heatmaps[class_id], gaussian)
+
+            dist = cv2.distanceTransform(mask, cv2.DIST_L2, 3)
+            max_dist = dist.max()
+            if max_dist > 0:
+                seedmaps[class_id] = np.maximum(seedmaps[class_id], (dist / max_dist).astype(np.float32))
+
+        return torch.from_numpy(heatmaps), torch.from_numpy(seedmaps)
 
     def _format_img(self, img: np.ndarray) -> torch.Tensor:
         """Format an image for YOLO from a Numpy array to a PyTorch tensor.

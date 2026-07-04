@@ -184,6 +184,9 @@ CFG_FLOAT_KEYS = frozenset(
         "time",
         "workspace",
         "batch",
+        "aux_sem_gain",
+        "heatmap_gain",
+        "seedmap_gain",
     }
 )
 CFG_FRACTION_KEYS = frozenset(

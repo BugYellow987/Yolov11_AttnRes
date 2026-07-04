@@ -30,8 +30,13 @@ __all__ = (
     "Attention",
     "AttentionResiduals",
     "CSAR",
+    "CrossScaleAttention",
+    "PatchCSAR",
     "FSAttentionResiduals",
+    "FSNetShuffle",
     "FeatureShuffle",
+    "SCA",
+    "ScaleShuffle",
     "BNContrastiveHead",
     "Bottleneck",
     "BottleneckCSP",
@@ -1168,6 +1173,82 @@ class FeatureShuffle(nn.Module):
         return x.transpose(1, 2).contiguous().view(b, c, h, w)
 
 
+class ScaleShuffle(FeatureShuffle):
+    """Backward-compatible name for checkpoints saved with the old ScaleShuffle class."""
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor):
+        """Fuse old multi-scale list inputs while retaining FeatureShuffle tensor behavior."""
+        if isinstance(x, (list, tuple)):
+            xs = list(x)
+            size = xs[0].shape[-2:]
+            xs = [xi if xi.shape[-2:] == size else F.interpolate(xi, size=size, mode="nearest") for xi in xs]
+
+            def fit_channels(t: torch.Tensor, channels: int) -> torch.Tensor:
+                if t.shape[1] == channels:
+                    return t
+                if t.shape[1] > channels:
+                    return t[:, :channels]
+                pad = t.new_zeros(t.shape[0], channels - t.shape[1], *t.shape[2:])
+                return torch.cat((t, pad), dim=1)
+
+            local = fit_channels(xs[0], self.c1)
+            context_source = torch.cat(xs[1:], dim=1) if len(xs) > 1 else xs[0][:, self.c1 :]
+            context = fit_channels(context_source, self.c2)
+            return self.channel_shuffle(torch.cat((local, context), dim=1), self.groups)
+        return super().forward(x)
+
+
+class FSNetShuffle(nn.Module):
+    """Multi-input FSNet-style shuffle layer for exchanging features across scales.
+
+    The layer returns one target-resolution tensor. Use multiple YAML rows with
+    different target indices when several shuffled scale outputs are needed.
+    """
+
+    def __init__(self, ch: list[int], c2: int, target: int = 0, groups: int = 2, k: int = 3, refine: bool = True):
+        """Initialize the multi-scale shuffle layer.
+
+        Args:
+            ch (list[int]): Input channel dimensions for each source feature.
+            c2 (int): Output channels.
+            target (int): Input index whose spatial size is used for the output.
+            groups (int): Number of channel-shuffle groups.
+            k (int): Kernel size for the optional output refinement convolution.
+            refine (bool): Whether to refine the shuffled output with a convolution.
+        """
+        super().__init__()
+        if not ch:
+            raise ValueError("FSNetShuffle requires at least one input feature map.")
+        self.target = target % len(ch)
+        self.groups = groups
+
+        base = c2 // len(ch)
+        splits = [base] * len(ch)
+        for i in range(c2 - base * len(ch)):
+            splits[i] += 1
+
+        self.proj = nn.ModuleList(Conv(c, out_c, 1, 1) for c, out_c in zip(ch, splits))
+        self.refine = Conv(c2, c2, k, 1) if refine else nn.Identity()
+
+    @staticmethod
+    def _resize(x: torch.Tensor, size: tuple[int, int]) -> torch.Tensor:
+        """Resize a feature map to the target spatial size."""
+        if x.shape[-2:] == size:
+            return x
+        if x.shape[-2] >= size[0] and x.shape[-1] >= size[1]:
+            return F.adaptive_avg_pool2d(x, size)
+        return F.interpolate(x, size=size, mode="nearest")
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
+        """Shuffle features from multiple scales into the target scale."""
+        xs = [x] if isinstance(x, torch.Tensor) else list(x)
+        if len(xs) != len(self.proj):
+            raise ValueError(f"FSNetShuffle expected {len(self.proj)} inputs, but received {len(xs)}.")
+        size = xs[self.target].shape[-2:]
+        parts = [self._resize(proj(xi), size) for proj, xi in zip(self.proj, xs)]
+        return self.refine(FeatureShuffle.channel_shuffle(torch.cat(parts, dim=1), self.groups))
+
+
 class FSAttentionResiduals(nn.Module):
     """Attention Residuals block with FSNet-style feature shuffle before each transform."""
 
@@ -1198,6 +1279,72 @@ class FSAttentionResiduals(nn.Module):
         for shuffle, mixer, block in zip(self.shuffle, self.attn_res, self.blocks):
             states.append(block(shuffle(mixer(states))))
         return self.cv2(self.out_shuffle(self.out_attn_res(states)))
+
+
+class SCA(nn.Module):
+    """Scale-aware Channel Attention for multi-scale YOLO feature maps.
+
+    This module adapts the COP-Net SCA idea to the Ultralytics YAML graph. It
+    receives multiple feature maps, aligns them to a target scale, computes a
+    target-guided channel attention vector, and fuses the reweighted features
+    into one refined target-resolution output.
+    """
+
+    def __init__(
+        self,
+        ch: list[int],
+        c2: int,
+        target: int = 0,
+        reduction: int = 4,
+        shortcut: bool = True,
+    ):
+        """Initialize SCA.
+
+        Args:
+            ch (list[int]): Input channel dimensions for each source feature.
+            c2 (int): Output channels.
+            target (int): Source index used for output resolution and channel guidance.
+            reduction (int): Channel reduction factor in the attention MLP.
+            shortcut (bool): Whether to add the target feature shortcut.
+        """
+        super().__init__()
+        if not ch:
+            raise ValueError("SCA requires at least one input feature map.")
+        self.target = target % len(ch)
+        hidden = max(c2 // max(int(reduction), 1), 8)
+        self.proj = nn.ModuleList(Conv(c, c2, 1, 1) for c in ch)
+        self.attn = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Conv2d(c2, hidden, 1, bias=True),
+            nn.SiLU(inplace=True),
+            nn.Conv2d(hidden, c2, 1, bias=True),
+            nn.Sigmoid(),
+        )
+        self.fuse = Conv(c2 * len(ch), c2, 3, 1)
+        self.shortcut = (
+            nn.Identity()
+            if shortcut and ch[self.target] == c2
+            else Conv(ch[self.target], c2, 1, act=False)
+            if shortcut
+            else None
+        )
+
+    @staticmethod
+    def _resize(x: torch.Tensor, size: tuple[int, int]) -> torch.Tensor:
+        """Resize a feature map to the target spatial size."""
+        return x if x.shape[-2:] == size else F.interpolate(x, size=size, mode="nearest")
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
+        """Fuse multi-scale inputs using target-guided channel attention."""
+        xs = [x] if isinstance(x, torch.Tensor) else list(x)
+        if len(xs) != len(self.proj):
+            raise ValueError(f"SCA expected {len(self.proj)} inputs, but received {len(xs)}.")
+        ref = xs[self.target]
+        size = ref.shape[-2:]
+        aligned = [self._resize(proj(xi), size) for proj, xi in zip(self.proj, xs)]
+        channel_weight = self.attn(aligned[self.target])
+        y = self.fuse(torch.cat([xi * channel_weight for xi in aligned], dim=1))
+        return y + self.shortcut(ref) if self.shortcut is not None else y
 
 
 class CSAR(nn.Module):
@@ -1280,6 +1427,149 @@ class CSAR(nn.Module):
         y = (attn.unsqueeze(3) * v).sum(dim=0).reshape(b, self.num_heads * self.head_dim, h, w)
         y = self.proj(y + self.pe(v[self.target].reshape(b, self.num_heads * self.head_dim, h, w)))
         return y + self.shortcut(ref) if self.shortcut is not None else y
+
+
+class PatchCSAR(CSAR):
+    """Overlapping patch-based Cross-Scale Attention Residual fusion.
+
+    This is a lightweight adaptation of COP-Net's PCA/COSA mechanism. It runs
+    CSAR attention on overlapping patches at the same relative locations across
+    scales, then averages overlapping predictions back into the target feature
+    map.
+    """
+
+    def __init__(
+        self,
+        ch: list[int],
+        c2: int,
+        num_heads: int = 4,
+        target: int = -1,
+        attn_ratio: float = 0.5,
+        shortcut: bool = True,
+        patch_ratio: float = 0.75,
+        division: str = "fud",
+    ):
+        """Initialize PatchCSAR.
+
+        Args:
+            ch (list[int]): Input channel dimensions for each source feature.
+            c2 (int): Output channels.
+            num_heads (int): Number of attention heads.
+            target (int): Source index used as query, output size, and residual.
+            attn_ratio (float): Key/query dimension ratio relative to each value head.
+            shortcut (bool): Whether to add the target feature shortcut.
+            patch_ratio (float): Patch height/width ratio relative to target feature size.
+            division (str): Patch splitting scheme, one of 'qud', 'ced', or 'fud'.
+        """
+        super().__init__(ch, c2, num_heads, target, attn_ratio, shortcut)
+        self.patch_ratio = float(patch_ratio)
+        self.division = str(division).lower()
+
+    @staticmethod
+    def _unique_boxes(boxes: list[tuple[int, int, int, int]]) -> list[tuple[int, int, int, int]]:
+        """Remove duplicate patch boxes while preserving order."""
+        seen = set()
+        unique = []
+        for box in boxes:
+            if box not in seen:
+                unique.append(box)
+                seen.add(box)
+        return unique
+
+    def _patch_boxes(self, h: int, w: int) -> list[tuple[int, int, int, int]]:
+        """Build overlapping patch boxes for QuD, CeD, or FuD splitting."""
+        ratio = min(max(self.patch_ratio, 0.1), 1.0)
+        ph = max(1, min(h, int(round(h * ratio))))
+        pw = max(1, min(w, int(round(w * ratio))))
+        cy = max((h - ph) // 2, 0)
+        cx = max((w - pw) // 2, 0)
+        bottom = h - ph
+        right = w - pw
+        boxes = [
+            (0, ph, 0, pw),
+            (0, ph, right, w),
+            (bottom, h, 0, pw),
+            (bottom, h, right, w),
+        ]
+        if self.division in {"ced", "fud", "full"}:
+            boxes.append((cy, cy + ph, cx, cx + pw))
+        if self.division in {"fud", "full"}:
+            boxes.extend(
+                [
+                    (0, ph, cx, cx + pw),
+                    (bottom, h, cx, cx + pw),
+                    (cy, cy + ph, 0, pw),
+                    (cy, cy + ph, right, w),
+                ]
+            )
+        return self._unique_boxes(boxes)
+
+    def _attend_patch(self, aligned: list[torch.Tensor], ref_patch: torch.Tensor) -> torch.Tensor:
+        """Apply CSAR attention to one aligned patch group."""
+        b, _, h, w = ref_patch.shape
+        q = self.q(ref_patch).view(b, self.num_heads, self.key_dim, h, w)
+        k = torch.stack(
+            [proj(xi).view(b, self.num_heads, self.key_dim, h, w) for proj, xi in zip(self.k, aligned)], dim=0
+        )
+        v = torch.stack(
+            [proj(xi).view(b, self.num_heads, self.head_dim, h, w) for proj, xi in zip(self.v, aligned)], dim=0
+        )
+        attn = (q.unsqueeze(0) * k).sum(dim=3) * self.scale
+        attn = attn.float().softmax(dim=0).to(dtype=v.dtype)
+        y = (attn.unsqueeze(3) * v).sum(dim=0).reshape(b, self.num_heads * self.head_dim, h, w)
+        y = self.proj(y + self.pe(v[self.target].reshape(b, self.num_heads * self.head_dim, h, w)))
+        return y + self.shortcut(ref_patch) if self.shortcut is not None else y
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
+        """Fuse multi-scale features using overlapping patch attention."""
+        xs = [x] if isinstance(x, torch.Tensor) else list(x)
+        if len(xs) != len(self.k):
+            raise ValueError(f"PatchCSAR expected {len(self.k)} inputs, but received {len(xs)}.")
+        ref = xs[self.target]
+        b, _, h, w = ref.shape
+        size = (h, w)
+        aligned = [self._resize(xi, size) for xi in xs]
+        out_channels = self.num_heads * self.head_dim
+        out = ref.new_zeros(b, out_channels, h, w)
+        weight = ref.new_zeros(1, 1, h, w)
+
+        for y1, y2, x1, x2 in self._patch_boxes(h, w):
+            patch_inputs = [xi[..., y1:y2, x1:x2] for xi in aligned]
+            patch = self._attend_patch(patch_inputs, ref[..., y1:y2, x1:x2])
+            out[..., y1:y2, x1:x2] += patch
+            weight[..., y1:y2, x1:x2] += 1
+        return out / weight.clamp_min(1)
+
+
+class CrossScaleAttention(CSAR):
+    """Backward-compatible CrossScaleAttention for checkpoints saved before CSAR was added."""
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
+        """Fuse old multi-scale inputs with the modules stored in legacy checkpoints."""
+        if all(hasattr(self, attr) for attr in ("num_heads", "key_dim", "head_dim", "pe", "shortcut")):
+            return super().forward(x)
+
+        xs = [x] if isinstance(x, torch.Tensor) else list(x)
+        if not xs:
+            raise ValueError("CrossScaleAttention requires at least one input feature map.")
+
+        target = getattr(self, "target", 0) % len(xs)
+        ref = xs[target]
+        b, _, h, w = ref.shape
+        size = (h, w)
+        aligned = [CSAR._resize(xi, size) for xi in xs]
+
+        if len(aligned) != len(self.k):
+            raise ValueError(f"CrossScaleAttention expected {len(self.k)} inputs, but received {len(aligned)}.")
+
+        q = self.q(ref)
+        k = torch.stack([proj(xi) for proj, xi in zip(self.k, aligned)], dim=0)
+        v = torch.stack([proj(xi) for proj, xi in zip(self.v, aligned)], dim=0)
+
+        scale = getattr(self, "scale", q.shape[1] ** -0.5)
+        attn = (q.unsqueeze(0) * k).sum(dim=2, keepdim=True) * scale
+        attn = attn.float().softmax(dim=0).to(dtype=v.dtype)
+        return self.proj((attn * v).sum(dim=0))
 
 
 class C3k2(C2f):
@@ -2209,6 +2499,8 @@ class Proto26(Proto):
         self.feat_refine = nn.ModuleList(Conv(x, ch[0], k=1) for x in ch[1:])
         self.feat_fuse = Conv(ch[0], c_, k=3)
         self.semseg = nn.Sequential(Conv(ch[0], c_, k=3), Conv(c_, c_, k=3), nn.Conv2d(c_, nc, 1))
+        self.heatmap = nn.Sequential(Conv(ch[0], c_, k=3), nn.Conv2d(c_, nc, 1))
+        self.seedmap = nn.Sequential(Conv(ch[0], c_, k=3), nn.Conv2d(c_, nc, 1))
 
     def forward(self, x: torch.Tensor, return_semantic: bool = True) -> torch.Tensor:
         """Perform a forward pass by fusing multi-scale feature maps and generating proto masks."""
@@ -2219,13 +2511,19 @@ class Proto26(Proto):
             feat = feat + up_feat
         p = super().forward(self.feat_fuse(feat))
         if self.training and return_semantic:
-            semantic = self.semseg(feat)
-            return (p, semantic)
+            dense = {
+                "semantic": self.semseg(feat),
+                "heatmap": self.heatmap(feat),
+                "seedmap": self.seedmap(feat),
+            }
+            return (p, dense)
         return p
 
     def fuse(self):
         """Fuse the model for inference by removing the semantic segmentation head."""
         self.semseg = None
+        self.heatmap = None
+        self.seedmap = None
 
 
 class RealNVP(nn.Module):

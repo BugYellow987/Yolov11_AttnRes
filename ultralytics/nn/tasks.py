@@ -41,6 +41,8 @@ from ultralytics.nn.modules import (
     CBFuse,
     CBLinear,
     CSAR,
+    CrossScaleAttention,
+    PatchCSAR,
     Classify,
     Concat,
     Conv,
@@ -50,6 +52,7 @@ from ultralytics.nn.modules import (
     DWConv,
     DWConvTranspose2d,
     FSAttentionResiduals,
+    FSNetShuffle,
     Focus,
     GhostBottleneck,
     GhostConv,
@@ -69,6 +72,7 @@ from ultralytics.nn.modules import (
     SCDown,
     Segment,
     Segment26,
+    SCA,
     SemanticSegment,
     TorchVision,
     WorldDetect,
@@ -1785,7 +1789,7 @@ def parse_model(d, ch, verbose=True):
             args = [ch[f]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
-        elif m is CSAR:
+        elif m in {CSAR, CrossScaleAttention, PatchCSAR, SCA, FSNetShuffle}:
             c2 = args[0]
             if c2 != nc:
                 c2 = make_divisible(min(c2, max_channels) * width, 8)
