@@ -19,9 +19,11 @@ __all__ = (
     "C3",
     "C3TR",
     "CIB",
+    "CSAR",
     "DFL",
     "ELAN1",
     "PSA",
+    "SCA",
     "SPP",
     "SPPELAN",
     "SPPF",
@@ -29,14 +31,6 @@ __all__ = (
     "ADown",
     "Attention",
     "AttentionResiduals",
-    "CSAR",
-    "CrossScaleAttention",
-    "PatchCSAR",
-    "FSAttentionResiduals",
-    "FSNetShuffle",
-    "FeatureShuffle",
-    "SCA",
-    "ScaleShuffle",
     "BNContrastiveHead",
     "Bottleneck",
     "BottleneckCSP",
@@ -50,16 +44,22 @@ __all__ = (
     "CBFuse",
     "CBLinear",
     "ContrastiveHead",
+    "CrossScaleAttention",
+    "FSAttentionResiduals",
+    "FSNetShuffle",
+    "FeatureShuffle",
     "GhostBottleneck",
     "HGBlock",
     "HGStem",
     "ImagePoolingAttn",
+    "PatchCSAR",
     "Proto",
     "RepC3",
     "RepNCSPELAN4",
     "RepVGGDW",
     "ResNetLayer",
     "SCDown",
+    "ScaleShuffle",
     "TorchVision",
 )
 
@@ -1078,9 +1078,8 @@ class C3f(nn.Module):
 class AttentionResiduals2d(nn.Module):
     """Attention Residuals mixer for 2D feature maps.
 
-    This adapts depth-wise Attention Residuals to CNN feature states with shape
-    [B, C, H, W], applying a learned pseudo-query over previous states at each
-    spatial location.
+    This adapts depth-wise Attention Residuals to CNN feature states with shape [B, C, H, W], applying a learned
+    pseudo-query over previous states at each spatial location.
     """
 
     def __init__(self, c: int, eps: float = 1e-6):
@@ -1201,8 +1200,8 @@ class ScaleShuffle(FeatureShuffle):
 class FSNetShuffle(nn.Module):
     """Multi-input FSNet-style shuffle layer for exchanging features across scales.
 
-    The layer returns one target-resolution tensor. Use multiple YAML rows with
-    different target indices when several shuffled scale outputs are needed.
+    The layer returns one target-resolution tensor. Use multiple YAML rows with different target indices when several
+    shuffled scale outputs are needed.
     """
 
     def __init__(self, ch: list[int], c2: int, target: int = 0, groups: int = 2, k: int = 3, refine: bool = True):
@@ -1284,10 +1283,9 @@ class FSAttentionResiduals(nn.Module):
 class SCA(nn.Module):
     """Scale-aware Channel Attention for multi-scale YOLO feature maps.
 
-    This module adapts the COP-Net SCA idea to the Ultralytics YAML graph. It
-    receives multiple feature maps, aligns them to a target scale, computes a
-    target-guided channel attention vector, and fuses the reweighted features
-    into one refined target-resolution output.
+    This module adapts the COP-Net SCA idea to the Ultralytics YAML graph. It receives multiple feature maps, aligns
+    them to a target scale, computes a target-guided channel attention vector, and fuses the reweighted features into
+    one refined target-resolution output.
     """
 
     def __init__(
@@ -1350,9 +1348,8 @@ class SCA(nn.Module):
 class CSAR(nn.Module):
     """Cross-Scale Attention Residual fusion for YOLO feature maps.
 
-    This module receives a list of feature maps, aligns them to a target feature
-    resolution, builds 1x1-conv query/key/value projections, attends over the
-    scale dimension, and adds a residual shortcut from the target feature.
+    This module receives a list of feature maps, aligns them to a target feature resolution, builds 1x1-conv
+    query/key/value projections, attends over the scale dimension, and adds a residual shortcut from the target feature.
     """
 
     def __init__(
@@ -1432,10 +1429,8 @@ class CSAR(nn.Module):
 class PatchCSAR(CSAR):
     """Overlapping patch-based Cross-Scale Attention Residual fusion.
 
-    This is a lightweight adaptation of COP-Net's PCA/COSA mechanism. It runs
-    CSAR attention on overlapping patches at the same relative locations across
-    scales, then averages overlapping predictions back into the target feature
-    map.
+    This is a lightweight adaptation of COP-Net's PCA/COSA mechanism. It runs CSAR attention on overlapping patches at
+    the same relative locations across scales, then averages overlapping predictions back into the target feature map.
     """
 
     def __init__(
@@ -1479,8 +1474,8 @@ class PatchCSAR(CSAR):
     def _patch_boxes(self, h: int, w: int) -> list[tuple[int, int, int, int]]:
         """Build overlapping patch boxes for QuD, CeD, or FuD splitting."""
         ratio = min(max(self.patch_ratio, 0.1), 1.0)
-        ph = max(1, min(h, int(round(h * ratio))))
-        pw = max(1, min(w, int(round(w * ratio))))
+        ph = max(1, min(h, round(h * ratio)))
+        pw = max(1, min(w, round(w * ratio)))
         cy = max((h - ph) // 2, 0)
         cx = max((w - pw) // 2, 0)
         bottom = h - ph
@@ -1555,7 +1550,7 @@ class CrossScaleAttention(CSAR):
 
         target = getattr(self, "target", 0) % len(xs)
         ref = xs[target]
-        b, _, h, w = ref.shape
+        _b, _, h, w = ref.shape
         size = (h, w)
         aligned = [CSAR._resize(xi, size) for xi in xs]
 
