@@ -19,7 +19,6 @@ import numpy as np
 
 from ultralytics import YOLO
 
-
 IMG_SUFFIXES = {".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".webp"}
 
 
@@ -36,8 +35,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default=None, help="CUDA device, e.g. 0, or cpu. Defaults to Ultralytics auto.")
     parser.add_argument("--classes", type=int, nargs="+", default=None, help="Optional class IDs to keep.")
     parser.add_argument("--alpha", type=float, default=0.45, help="Overlay opacity for heatmap and seedmap.")
-    parser.add_argument("--overlay-thres", type=float, default=0.05, help="Hide heatmap/seedmap values below this normalized threshold.")
-    parser.add_argument("--sigma-scale", type=float, default=1.0, help="Gaussian sigma scaler based on max object thickness.")
+    parser.add_argument(
+        "--overlay-thres", type=float, default=0.05, help="Hide heatmap/seedmap values below this normalized threshold."
+    )
+    parser.add_argument(
+        "--sigma-scale", type=float, default=1.0, help="Gaussian sigma scaler based on max object thickness."
+    )
     parser.add_argument("--score-weight", action="store_true", help="Weight heatmap/seedmap strength by confidence.")
     parser.add_argument("--retina-masks", action="store_true", help="Use high-resolution YOLO masks.")
     parser.add_argument("--segment-fill", action="store_true", help="Fill segmentation masks in the Segment panel.")
@@ -176,12 +179,12 @@ def build_heatmap_and_seedmap(
         # 1. 計算 Distance Transform (找尋生鏽區最厚/最深的地方)
         dist = cv2.distanceTransform(mask_u8, cv2.DIST_L2, 3)
         max_dist = float(dist.max())
-        
+
         # 2. 找出距離變換最大值的位置 (即特徵中心 cx, cy)
         if max_dist > 0:
             _, max_val, _, max_loc = cv2.minMaxLoc(dist)
             cx, cy = max_loc
-            
+
             # 3. 設定動態 Sigma，大小跟隨該點的厚度，避免長條形狀被壓扁
             # 乘上 2.5 是一個視覺平滑基準，再疊加使用者的 sigma_scale 微調
             sigma = max(2.0, max_val * sigma_scale * 2.5)
