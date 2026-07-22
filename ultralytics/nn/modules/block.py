@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from ultralytics.utils.torch_utils import fuse_conv_and_bn
 
 from .conv import Conv, DWConv, GhostConv, LightConv, RepConv, autopad
-from .transformer import TransformerBlock
+from .transformer import LayerNorm2d, TransformerBlock
 
 __all__ = (
     "C1",
@@ -29,6 +29,7 @@ __all__ = (
     "ADown",
     "Attention",
     "AttentionResiduals",
+    "SETA",
     "CSAR",
     "CrossScaleAttention",
     "PatchCSAR",
@@ -1132,6 +1133,330 @@ class AttentionResiduals(nn.Module):
         for mixer, block in zip(self.attn_res, self.blocks):
             states.append(block(mixer(states)))
         return self.cv2(self.out_attn_res(states))
+
+
+class SETACore(nn.Module):
+    """Scale-Equilibrium Transport Self-Attention for one 2D feature scale.
+
+    The module conserves local evidence with windowed doubly-stochastic attention,
+    models global semantics with a compact anchor grid, transports evidence in both
+    directions between local tokens and anchors, and routes the three outputs with
+    token-wise learned weights.
+    """
+
+    def __init__(
+        self,
+        c: int,
+        num_heads: int = 4,
+        window_size: int = 4,
+        anchor_grid: int = 4,
+        sinkhorn_iters: int = 3,
+    ):
+        """Initialize a SETA attention core.
+
+        Args:
+            c (int): Input and output channels.
+            num_heads (int): Number of attention heads.
+            window_size (int): Side length of each local attention window.
+            anchor_grid (int): Side length of the pooled global anchor grid.
+            sinkhorn_iters (int): Number of alternating Sinkhorn normalization iterations.
+        """
+        super().__init__()
+        self.num_heads = max(1, min(int(num_heads), c))
+        while c % self.num_heads:
+            self.num_heads -= 1
+        self.head_dim = c // self.num_heads
+        self.scale = self.head_dim**-0.5
+        self.window_size = max(int(window_size), 1)
+        self.window_tokens = self.window_size**2
+        self.anchor_grid = max(int(anchor_grid), 1)
+        self.sinkhorn_iters = max(int(sinkhorn_iters), 1)
+
+        self.local_qkv = nn.Conv2d(c, 3 * c, 1, bias=False)
+        self.global_q = nn.Conv2d(c, c, 1, bias=False)
+        self.transport_q = nn.Conv2d(c, c, 1, bias=False)
+        self.anchor_kv = nn.Conv2d(c, 2 * c, 1, bias=False)
+        self.updated_anchor_v = nn.Conv2d(c, c, 1, bias=False)
+        self.proj = nn.Conv2d(c, c, 1, bias=False)
+
+        relative_positions = (2 * self.window_size - 1) ** 2
+        self.relative_position_bias_table = nn.Parameter(torch.zeros(relative_positions, self.num_heads))
+        coords = torch.stack(
+            torch.meshgrid(torch.arange(self.window_size), torch.arange(self.window_size), indexing="ij")
+        ).flatten(1)
+        relative_coords = coords[:, :, None] - coords[:, None, :]
+        relative_coords = relative_coords.permute(1, 2, 0).contiguous()
+        relative_coords[:, :, 0] += self.window_size - 1
+        relative_coords[:, :, 1] += self.window_size - 1
+        relative_coords[:, :, 0] *= 2 * self.window_size - 1
+        self.register_buffer("relative_position_index", relative_coords.sum(-1), persistent=False)
+        nn.init.trunc_normal_(self.relative_position_bias_table, std=0.02)
+
+        router_hidden = max(c // 8, 8)
+        self.router_norm = nn.LayerNorm(5)
+        self.router = nn.Sequential(
+            nn.Linear(5, router_hidden),
+            nn.SiLU(inplace=True),
+            nn.Linear(router_hidden, 3),
+        )
+        nn.init.zeros_(self.router[-1].weight)
+        nn.init.zeros_(self.router[-1].bias)
+
+    @staticmethod
+    def _square_sinkhorn(logits: torch.Tensor, iterations: int) -> torch.Tensor:
+        """Normalize square local attention matrices toward doubly-stochastic plans."""
+        log_plan = logits.float()
+        for _ in range(iterations):
+            log_plan = log_plan - torch.logsumexp(log_plan, dim=-1, keepdim=True)
+            log_plan = log_plan - torch.logsumexp(log_plan, dim=-2, keepdim=True)
+        log_plan = log_plan - torch.logsumexp(log_plan, dim=-1, keepdim=True)
+        return log_plan.exp().to(dtype=logits.dtype)
+
+    @staticmethod
+    def _rectangular_sinkhorn(logits: torch.Tensor, iterations: int) -> torch.Tensor:
+        """Normalize an N-by-M transport plan with row mass 1 and column mass N/M.
+
+        The target column mass is derived from the mean column mass after every
+        row normalization, avoiding the inconsistent row=1 and column=1 constraints
+        when the token and anchor counts differ.
+        """
+        log_plan = logits.float()
+        for _ in range(iterations):
+            log_plan = log_plan - torch.logsumexp(log_plan, dim=-1, keepdim=True)
+            log_column_mass = torch.logsumexp(log_plan, dim=-2, keepdim=True)
+            log_target_mass = log_column_mass.exp().mean(dim=-1, keepdim=True).clamp_min(1e-8).log()
+            log_plan = log_plan - log_column_mass + log_target_mass
+        return log_plan.exp().to(dtype=logits.dtype)
+
+    @staticmethod
+    def _window_partition(x: torch.Tensor, window_size: int) -> tuple[torch.Tensor, int, int]:
+        """Partition [B, heads, dim, H, W] features into flattened windows."""
+        b, heads, dim, h, w = x.shape
+        pad_h = (window_size - h % window_size) % window_size
+        pad_w = (window_size - w % window_size) % window_size
+        if pad_h or pad_w:
+            x = F.pad(x, (0, pad_w, 0, pad_h))
+        hp, wp = h + pad_h, w + pad_w
+        x = x.view(b, heads, dim, hp // window_size, window_size, wp // window_size, window_size)
+        x = x.permute(0, 3, 5, 1, 4, 6, 2).contiguous()
+        return x.view(-1, heads, window_size**2, dim), pad_h, pad_w
+
+    @staticmethod
+    def _window_reverse(
+        windows: torch.Tensor,
+        batch: int,
+        height: int,
+        width: int,
+        window_size: int,
+        pad_h: int,
+        pad_w: int,
+    ) -> torch.Tensor:
+        """Reverse flattened windows to a [B, heads, dim, H, W] feature map."""
+        heads, dim = windows.shape[1], windows.shape[-1]
+        hp, wp = height + pad_h, width + pad_w
+        windows = windows.view(
+            batch,
+            hp // window_size,
+            wp // window_size,
+            heads,
+            window_size,
+            window_size,
+            dim,
+        )
+        x = windows.permute(0, 3, 6, 1, 4, 2, 5).contiguous().view(batch, heads, dim, hp, wp)
+        return x[..., :height, :width]
+
+    @staticmethod
+    def _valid_window_tokens(
+        reference: torch.Tensor,
+        batch: int,
+        height: int,
+        width: int,
+        window_size: int,
+        pad_h: int,
+        pad_w: int,
+    ) -> torch.Tensor:
+        """Return a validity mask for tokens in padded local windows."""
+        valid = reference.new_ones((1, 1, height, width))
+        if pad_h or pad_w:
+            valid = F.pad(valid, (0, pad_w, 0, pad_h), value=0)
+        hp, wp = height + pad_h, width + pad_w
+        valid = valid.view(1, 1, hp // window_size, window_size, wp // window_size, window_size)
+        valid = valid.permute(0, 2, 4, 1, 3, 5).contiguous().view(-1, window_size**2)
+        return valid.bool().repeat(batch, 1)
+
+    def _local_attention(self, local: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Apply local window Sinkhorn attention and return output, entropy, and local values."""
+        b, c, h, w = local.shape
+        qkv = self.local_qkv(local).view(b, 3, self.num_heads, self.head_dim, h, w)
+        q, k, value_map = qkv.unbind(dim=1)
+        q, pad_h, pad_w = self._window_partition(q, self.window_size)
+        k, _, _ = self._window_partition(k, self.window_size)
+        value, _, _ = self._window_partition(value_map, self.window_size)
+
+        logits = torch.matmul(q, k.transpose(-2, -1)) * self.scale
+        bias = self.relative_position_bias_table[self.relative_position_index.reshape(-1)]
+        bias = bias.view(self.window_tokens, self.window_tokens, self.num_heads).permute(2, 0, 1)
+        logits = logits + bias.unsqueeze(0).to(dtype=logits.dtype)
+
+        valid = self._valid_window_tokens(local, b, h, w, self.window_size, pad_h, pad_w)
+        valid_pair = valid[:, None, :, None] & valid[:, None, None, :]
+        invalid = ~valid
+        identity = torch.eye(self.window_tokens, dtype=torch.bool, device=local.device)[None, None]
+        dummy_identity = invalid[:, None, :, None] & invalid[:, None, None, :] & identity
+        logits = logits.masked_fill(~valid_pair, float("-inf"))
+        logits = torch.where(dummy_identity, torch.zeros((), dtype=logits.dtype, device=logits.device), logits)
+
+        attention = self._square_sinkhorn(logits, self.sinkhorn_iters)
+        output = torch.matmul(attention, value)
+        output = self._window_reverse(output, b, h, w, self.window_size, pad_h, pad_w)
+
+        entropy = attention.float().clamp_min(1e-8)
+        entropy = -(entropy * entropy.log()).sum(dim=-1) / torch.log(
+            entropy.new_tensor(float(max(self.window_tokens, 2)))
+        )
+        entropy = entropy.mean(dim=1, keepdim=True).unsqueeze(-1)
+        entropy = self._window_reverse(entropy, b, h, w, self.window_size, pad_h, pad_w)[:, 0, 0]
+        return output, entropy, value_map
+
+    def _as_tokens(self, x: torch.Tensor) -> torch.Tensor:
+        """Convert [B, C, H, W] into [B, heads, HW, head_dim]."""
+        b = x.shape[0]
+        return x.reshape(b, self.num_heads, self.head_dim, -1).transpose(-2, -1)
+
+    def _as_map(self, x: torch.Tensor, height: int, width: int) -> torch.Tensor:
+        """Convert [B, heads, HW, head_dim] into [B, C, H, W]."""
+        b = x.shape[0]
+        return x.transpose(-2, -1).contiguous().view(b, self.num_heads * self.head_dim, height, width)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply local/global attention, bidirectional transport, and scale routing."""
+        b, _, h, w = x.shape
+        anchor_map = F.adaptive_avg_pool2d(x, (self.anchor_grid, self.anchor_grid))
+        global_map = F.interpolate(anchor_map, size=(h, w), mode="bilinear", align_corners=False)
+        local_map = x - global_map
+
+        z_local_map, h_local_map, local_value_map = self._local_attention(local_map)
+        z_local = self._as_tokens(z_local_map)
+        local_values = self._as_tokens(local_value_map)
+
+        global_query = self._as_tokens(self.global_q(global_map))
+        transport_query = self._as_tokens(self.transport_q(local_map))
+        anchor_kv = self.anchor_kv(anchor_map).view(
+            b, 2, self.num_heads, self.head_dim, self.anchor_grid, self.anchor_grid
+        )
+        anchor_key, anchor_value = anchor_kv.unbind(dim=1)
+        anchor_key = anchor_key.flatten(-2).transpose(-2, -1)
+        anchor_value = anchor_value.flatten(-2).transpose(-2, -1)
+
+        global_logits = torch.matmul(global_query, anchor_key.transpose(-2, -1)) * self.scale
+        global_attention = global_logits.float().softmax(dim=-1).to(dtype=global_logits.dtype)
+        z_global = torch.matmul(global_attention, anchor_value)
+
+        transport_logits = torch.matmul(transport_query, anchor_key.transpose(-2, -1)) * self.scale
+        transport = self._rectangular_sinkhorn(transport_logits, self.sinkhorn_iters)
+        row_transport = transport / transport.sum(dim=-1, keepdim=True).clamp_min(1e-6)
+
+        column_mass = transport.sum(dim=-2).unsqueeze(-1).clamp_min(1e-6)
+        anchor_evidence = torch.matmul(transport.transpose(-2, -1), local_values) / column_mass
+        anchor_state = self._as_tokens(anchor_map)
+        updated_anchor = anchor_state + anchor_evidence
+        updated_anchor_map = self._as_map(updated_anchor, self.anchor_grid, self.anchor_grid)
+        updated_anchor_value = self._as_tokens(self.updated_anchor_v(updated_anchor_map))
+        delta_local = torch.matmul(row_transport, updated_anchor_value)
+
+        local_float = local_map.float()
+        local_energy = (local_float.square().mean(dim=1) + 1e-6).sqrt().flatten(1)
+        delta_x = F.pad((local_float[..., 1:] - local_float[..., :-1]).abs(), (0, 1, 0, 0))
+        delta_y = F.pad((local_float[..., 1:, :] - local_float[..., :-1, :]).abs(), (0, 0, 0, 1))
+        variation = (delta_x + delta_y).mean(dim=1).flatten(1)
+        h_local = h_local_map.flatten(1).float()
+
+        global_probability = global_attention.float().clamp_min(1e-8)
+        h_global = -(global_probability * global_probability.log()).sum(dim=-1)
+        h_global = h_global.mean(dim=1) / torch.log(global_probability.new_tensor(float(max(anchor_key.shape[-2], 2))))
+        transport_probability = row_transport.float().clamp_min(1e-8)
+        h_transport = -(transport_probability * transport_probability.log()).sum(dim=-1)
+        h_transport = h_transport.mean(dim=1) / torch.log(
+            transport_probability.new_tensor(float(max(anchor_key.shape[-2], 2)))
+        )
+        confidence = 1.0 - h_transport
+
+        descriptor = torch.stack((local_energy, h_local, h_global, variation, confidence), dim=-1)
+        route = self.router(self.router_norm(descriptor)).softmax(dim=-1).to(dtype=z_local.dtype)
+        output = (
+            route[:, None, :, 0, None] * z_local
+            + route[:, None, :, 1, None] * z_global
+            + route[:, None, :, 2, None] * delta_local
+        )
+        return self.proj(self._as_map(output, h, w))
+
+
+class SETALayer(nn.Module):
+    """Residual SETA attention and convolutional feed-forward layer."""
+
+    def __init__(
+        self,
+        c: int,
+        num_heads: int = 4,
+        window_size: int = 4,
+        anchor_grid: int = 4,
+        sinkhorn_iters: int = 3,
+        ffn_ratio: float = 2.0,
+        layer_scale_init: float = 1e-3,
+    ):
+        """Initialize one residual SETA layer."""
+        super().__init__()
+        ffn_channels = max(int(c * ffn_ratio), c)
+        self.norm1 = LayerNorm2d(c)
+        self.attn = SETACore(c, num_heads, window_size, anchor_grid, sinkhorn_iters)
+        self.norm2 = LayerNorm2d(c)
+        self.ffn = nn.Sequential(
+            nn.Conv2d(c, ffn_channels, 1),
+            nn.GELU(),
+            nn.Conv2d(ffn_channels, ffn_channels, 3, padding=1, groups=ffn_channels),
+            nn.GELU(),
+            nn.Conv2d(ffn_channels, c, 1),
+        )
+        self.gamma1 = nn.Parameter(torch.full((1, c, 1, 1), float(layer_scale_init)))
+        self.gamma2 = nn.Parameter(torch.full((1, c, 1, 1), float(layer_scale_init)))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply residual transport attention followed by a residual FFN."""
+        x = x + self.gamma1 * self.attn(self.norm1(x))
+        return x + self.gamma2 * self.ffn(self.norm2(x))
+
+
+class SETA(nn.Module):
+    """YOLO block that replaces AttentionResiduals with scale-equilibrium transport attention."""
+
+    def __init__(
+        self,
+        c1: int,
+        c2: int,
+        n: int = 1,
+        e: float = 0.5,
+        num_heads: int = 4,
+        window_size: int = 4,
+        anchor_grid: int = 4,
+        sinkhorn_iters: int = 3,
+        ffn_ratio: float = 2.0,
+    ):
+        """Initialize a repeatable SETA block with the AttentionResiduals YAML interface."""
+        super().__init__()
+        hidden = max(int(c2 * e), 1)
+        self.cv1 = Conv(c1, hidden, 1, 1)
+        self.layers = nn.Sequential(
+            *(
+                SETALayer(hidden, num_heads, window_size, anchor_grid, sinkhorn_iters, ffn_ratio)
+                for _ in range(max(int(n), 1))
+            )
+        )
+        self.cv2 = Conv(hidden, c2, 1, 1)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Project, refine with SETA layers, and restore the requested output channels."""
+        return self.cv2(self.layers(self.cv1(x)))
 
 
 class FeatureShuffle(nn.Module):

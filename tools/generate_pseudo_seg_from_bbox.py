@@ -53,6 +53,15 @@ def parse_args() -> argparse.Namespace:
         nargs="*",
         help="Optional class ids to process, e.g. --classes 0 2. Other classes are copied as bbox rectangles.",
     )
+    parser.add_argument(
+        "--seed-mode",
+        choices=("center", "rust", "hybrid"),
+        default="hybrid",
+        help=(
+            "Seed heatmap source. 'center' is class-agnostic and works for all rectangular labels, "
+            "'rust' favors reddish-brown regions, and 'hybrid' combines both."
+        ),
+    )
     parser.add_argument("--fg-thres", type=float, default=0.62, help="Heatmap threshold for sure foreground seeds.")
     parser.add_argument("--bg-thres", type=float, default=0.24, help="Heatmap threshold for probable background.")
     parser.add_argument("--pad", type=float, default=0.15, help="Context padding around each bbox, as box-size fraction.")
@@ -139,6 +148,29 @@ def rust_heatmap(crop_bgr: np.ndarray) -> np.ndarray:
     return cv2.GaussianBlur(np.clip(score, 0.0, 1.0), (0, 0), 1.2)
 
 
+def center_heatmap(shape: tuple[int, int], rel_box: tuple[int, int, int, int]) -> np.ndarray:
+    """Return a class-agnostic center prior inside a relative xyxy box."""
+    h, w = shape
+    x1, y1, x2, y2 = rel_box
+    inside = np.zeros((h, w), dtype=np.uint8)
+    inside[y1:y2, x1:x2] = 1
+    if not inside.any():
+        return np.zeros((h, w), dtype=np.float32)
+
+    dist = cv2.distanceTransform(inside, cv2.DIST_L2, 3).astype(np.float32)
+    if float(dist.max()) > 0:
+        dist /= float(dist.max())
+
+    yy, xx = np.ogrid[:h, :w]
+    cx = (x1 + x2) * 0.5
+    cy = (y1 + y2) * 0.5
+    sigma_x = max(1.0, (x2 - x1) * 0.35)
+    sigma_y = max(1.0, (y2 - y1) * 0.35)
+    gaussian = np.exp(-(((xx - cx) ** 2) / (2 * sigma_x**2) + ((yy - cy) ** 2) / (2 * sigma_y**2)))
+    prior = np.maximum(dist, gaussian.astype(np.float32) * inside)
+    return cv2.GaussianBlur(np.clip(prior, 0.0, 1.0), (0, 0), 0.8)
+
+
 def padded_box(box: tuple[int, int, int, int], shape: tuple[int, int], pad_frac: float) -> tuple[int, int, int, int]:
     h, w = shape
     x1, y1, x2, y2 = box
@@ -177,10 +209,18 @@ def build_mask_for_box(
     x1, y1, x2, y2 = box
     px1, py1, px2, py2 = padded_box(box, (h, w), args.pad)
     crop = image[py1:py2, px1:px2]
-    heat = rust_heatmap(crop)
 
     rel_x1, rel_y1 = x1 - px1, y1 - py1
     rel_x2, rel_y2 = x2 - px1, y2 - py1
+    rust = rust_heatmap(crop)
+    center = center_heatmap(crop.shape[:2], (rel_x1, rel_y1, rel_x2, rel_y2))
+    if args.seed_mode == "rust":
+        heat = rust
+    elif args.seed_mode == "center":
+        heat = center
+    else:
+        heat = np.maximum(center * 0.85, rust)
+
     inside = np.zeros(heat.shape, dtype=bool)
     inside[rel_y1:rel_y2, rel_x1:rel_x2] = True
 

@@ -53,9 +53,6 @@ head:
   - [[15, 16, 17, 18], 1, PatchCSAR, [512, 4, 2, 0.5, True, 0.75, fud]] # 20-P4/16
   - [[15, 16, 17, 18], 1, PatchCSAR, [1024, 4, 3, 0.5, True, 0.75, fud]] # 21-P5/32
 
-  # - [[15, 16, 17, 18], 1, CSAR, [512, 4, 1, 0.5, True]]  # 15-P3/8 refined from P2/P3/P4/P5
-  # - [[15, 16, 17, 18], 1, CSAR, [512, 4, 2, 0.5, True]]  # 16-P4/16 refined from P2/P3/P4/P5
-  # - [[15, 16, 17, 18], 1, CSAR, [1024, 4, 3, 0.5, True]] # 17-P5/32 refined from P2/P3/P4/P5
   # Standard CSAR refinement for stability and lower compute than a fully patch-based second stage.
   - [[15, 19, 20, 21], 1, CSAR, [512, 4, 1, 0.5, True]] # 22-P3/8
   - [[15, 19, 20, 21], 1, CSAR, [512, 4, 2, 0.5, True]] # 23-P4/16

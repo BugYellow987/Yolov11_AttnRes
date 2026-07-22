@@ -37,6 +37,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--classes", type=int, nargs="+", default=None, help="Optional class IDs to keep.")
     parser.add_argument("--alpha", type=float, default=0.45, help="Overlay opacity for heatmap and seedmap.")
     parser.add_argument("--sigma-scale", type=float, default=0.25, help="Gaussian sigma as fraction of min mask box side.")
+    parser.add_argument(
+        "--heatmap-mode",
+        choices=("mask", "center", "box"),
+        default="mask",
+        help=(
+            "Heatmap generation mode: 'mask' keeps the Gaussian clipped by the predicted mask, "
+            "'center' draws an unclipped Gaussian at the mask center, and 'box' uses the detection box center."
+        ),
+    )
     parser.add_argument("--score-weight", action="store_true", help="Weight heatmap/seedmap strength by confidence.")
     parser.add_argument("--retina-masks", action="store_true", help="Use high-resolution YOLO masks.")
     parser.add_argument("--segment-fill", action="store_true", help="Fill segmentation masks in the Segment panel.")
@@ -86,6 +95,13 @@ def get_scores(result, n: int) -> np.ndarray:
     if result.boxes is None or result.boxes.conf is None or len(result.boxes.conf) != n:
         return np.ones(n, dtype=np.float32)
     return result.boxes.conf.detach().cpu().numpy().astype(np.float32)
+
+
+def get_boxes(result, n: int) -> np.ndarray | None:
+    """Return per-mask boxes as xyxy pixels when available."""
+    if result.boxes is None or result.boxes.xyxy is None or len(result.boxes.xyxy) != n:
+        return None
+    return result.boxes.xyxy.detach().cpu().numpy().astype(np.float32)
 
 
 def class_color(class_id: int, name: str = "") -> tuple[int, int, int]:
@@ -154,7 +170,12 @@ def draw_segment_outline(
 
 
 def build_heatmap_and_seedmap(
-    masks: np.ndarray, scores: np.ndarray, sigma_scale: float, score_weight: bool
+    masks: np.ndarray,
+    scores: np.ndarray,
+    sigma_scale: float,
+    score_weight: bool,
+    heatmap_mode: str = "mask",
+    boxes: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Create mask-derived Gaussian heatmap and distance-transform seedmap."""
     if masks.shape[0] == 0:
@@ -166,18 +187,24 @@ def build_heatmap_and_seedmap(
     heatmap = np.zeros((h, w), dtype=np.float32)
     seedmap = np.zeros((h, w), dtype=np.float32)
 
-    for mask, score in zip(masks, scores):
+    for i, (mask, score) in enumerate(zip(masks, scores)):
         if not mask.any():
             continue
         weight = float(score) if score_weight else 1.0
         mask_u8 = mask.astype(np.uint8)
         ys, xs = np.nonzero(mask_u8)
-        x1, x2, y1, y2 = xs.min(), xs.max(), ys.min(), ys.max()
-        cx, cy = xs.mean(), ys.mean()
+        if heatmap_mode == "box" and boxes is not None:
+            x1, y1, x2, y2 = boxes[i]
+            cx, cy = (x1 + x2) * 0.5, (y1 + y2) * 0.5
+        else:
+            x1, x2, y1, y2 = xs.min(), xs.max(), ys.min(), ys.max()
+            cx, cy = xs.mean(), ys.mean()
         sigma = max(1.0, min(x2 - x1 + 1, y2 - y1 + 1) * sigma_scale)
 
         gaussian = np.exp(-((xx - cx) ** 2 + (yy - cy) ** 2) / (2 * sigma**2)).astype(np.float32)
-        heatmap = np.maximum(heatmap, gaussian * mask_u8 * weight)
+        if heatmap_mode == "mask":
+            gaussian *= mask_u8
+        heatmap = np.maximum(heatmap, gaussian * weight)
 
         dist = cv2.distanceTransform(mask_u8, cv2.DIST_L2, 3)
         max_dist = float(dist.max())
@@ -230,7 +257,10 @@ def save_result(result, save_dir: Path, index: int, args: argparse.Namespace) ->
     image = result.orig_img.copy()
     masks = masks_to_numpy(result)
     scores = get_scores(result, len(masks))
-    heatmap, seedmap = build_heatmap_and_seedmap(masks, scores, args.sigma_scale, args.score_weight)
+    boxes = get_boxes(result, len(masks))
+    heatmap, seedmap = build_heatmap_and_seedmap(
+        masks, scores, args.sigma_scale, args.score_weight, args.heatmap_mode, boxes
+    )
 
     segment = (
         result.plot()

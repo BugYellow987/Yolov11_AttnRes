@@ -1,0 +1,18 @@
+# Ultralytics YOLO segmentation dataset generated from rectangular labels via pseudo masks.
+# Generate it with:
+#   python tools/build_pseudo_seg_dataset.py --source-data C:/Users/sile7/Downloads/dataset0608/dataset0608/data.yaml --out-root C:/Users/sile7/Downloads/dataset0608/dataset0608/dataset_pseudo_grabcut --debug-dir C:/Users/sile7/Downloads/dataset0608/dataset0608/runs/pseudo_masks --seed-mode hybrid
+
+path: C:/Users/sile7/Downloads/dataset0608/dataset0608/dataset_pseudo_grabcut
+train: images/train
+val: images/train
+nc: 8
+
+names:
+  0: B
+  1: C
+  2: D
+  3: H
+  4: O
+  5: R
+  6: X
+  7: U
