@@ -31,6 +31,7 @@ __all__ = (
     "AttentionResiduals",
     "SETA",
     "CSAR",
+    "MultiStateCSAR",
     "CrossScaleAttention",
     "PatchCSAR",
     "FSAttentionResiduals",
@@ -1751,6 +1752,81 @@ class CSAR(nn.Module):
         attn = attn.float().softmax(dim=0).to(dtype=v.dtype)
         y = (attn.unsqueeze(3) * v).sum(dim=0).reshape(b, self.num_heads * self.head_dim, h, w)
         y = self.proj(y + self.pe(v[self.target].reshape(b, self.num_heads * self.head_dim, h, w)))
+        return y + self.shortcut(ref) if self.shortcut is not None else y
+
+
+class MultiStateCSAR(CSAR):
+    """CSAR that keeps each input scale as a token state before learned state interaction.
+
+    Each aligned source feature is treated as a different state of the same spatial token. A small MLP mixes the
+    explicit state axis, while a zero-initialized residual gate makes the module start with standard CSAR behavior.
+    The mixed states are aggregated only after query-key attention has assigned a content-dependent weight to each
+    state.
+    """
+
+    def __init__(
+        self,
+        ch: list[int],
+        c2: int,
+        num_heads: int = 4,
+        target: int = -1,
+        attn_ratio: float = 0.5,
+        shortcut: bool = True,
+        state_expansion: float = 2.0,
+    ):
+        """Initialize multi-state cross-scale attention.
+
+        Args:
+            ch (list[int]): Input channel dimensions; every input represents one token state.
+            c2 (int): Output channels.
+            num_heads (int): Number of attention heads.
+            target (int): State used for the query, output resolution, positional encoding, and residual.
+            attn_ratio (float): Key/query dimension ratio relative to each value head.
+            shortcut (bool): Whether to add a shortcut from the target state.
+            state_expansion (float): Hidden expansion ratio of the state-axis MLP.
+        """
+        super().__init__(ch, c2, num_heads, target, attn_ratio, shortcut)
+        self.num_states = len(ch)
+        hidden_states = max(self.num_states, int(round(self.num_states * state_expansion)))
+        self.state_mixer = nn.Sequential(
+            nn.Linear(self.num_states, hidden_states, bias=False),
+            nn.GELU(),
+            nn.Linear(hidden_states, self.num_states, bias=False),
+        )
+        # ReZero-style per-head gates preserve ordinary CSAR behavior at initialization.
+        self.state_gate = nn.Parameter(torch.zeros(self.num_heads))
+        self.state_bias = nn.Parameter(torch.zeros(self.num_states, self.num_heads))
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
+        """Interact over the explicit state axis, then aggregate states into the target feature map."""
+        xs = [x] if isinstance(x, torch.Tensor) else list(x)
+        if len(xs) != self.num_states:
+            raise ValueError(f"MultiStateCSAR expected {self.num_states} inputs, but received {len(xs)}.")
+        ref = xs[self.target]
+        b, _, h, w = ref.shape
+        aligned = [self._resize(xi, (h, w)) for xi in xs]
+
+        q = self.q(ref).view(b, self.num_heads, self.key_dim, h, w)
+        k = torch.stack(
+            [proj(xi).view(b, self.num_heads, self.key_dim, h, w) for proj, xi in zip(self.k, aligned)], dim=0
+        )
+        states = torch.stack(
+            [proj(xi).view(b, self.num_heads, self.head_dim, h, w) for proj, xi in zip(self.v, aligned)], dim=0
+        )
+
+        # [state, batch, head, channel, height, width] -> [..., state] for the shared state-axis MLP.
+        state_tokens = states.permute(1, 2, 3, 4, 5, 0)
+        mixed_tokens = self.state_mixer(state_tokens)
+        gate = torch.tanh(self.state_gate).view(1, self.num_heads, 1, 1, 1, 1)
+        state_tokens = state_tokens + gate * mixed_tokens
+        states = state_tokens.permute(5, 0, 1, 2, 3, 4)
+
+        logits = (q.unsqueeze(0) * k).sum(dim=3) * self.scale
+        logits = logits + self.state_bias[:, None, :, None, None]
+        weights = logits.float().softmax(dim=0).to(dtype=states.dtype)
+        y = (weights.unsqueeze(3) * states).sum(dim=0).reshape(b, self.num_heads * self.head_dim, h, w)
+        target_state = states[self.target].reshape(b, self.num_heads * self.head_dim, h, w)
+        y = self.proj(y + self.pe(target_state))
         return y + self.shortcut(ref) if self.shortcut is not None else y
 
 
