@@ -32,6 +32,7 @@ __all__ = (
     "SETA",
     "CSAR",
     "MultiStateCSAR",
+    "MSAT",
     "CrossScaleAttention",
     "PatchCSAR",
     "FSAttentionResiduals",
@@ -1828,6 +1829,318 @@ class MultiStateCSAR(CSAR):
         target_state = states[self.target].reshape(b, self.num_heads * self.head_dim, h, w)
         y = self.proj(y + self.pe(target_state))
         return y + self.shortcut(ref) if self.shortcut is not None else y
+
+
+class _MSATStateLayer(nn.Module):
+    """Pre-normalized self-attention and FFN over the state axis."""
+
+    def __init__(self, channels: int, num_heads: int, ffn_ratio: float, layer_scale_init: float):
+        """Initialize a state-axis Transformer layer."""
+        super().__init__()
+        self.num_heads = num_heads
+        self.head_dim = channels // num_heads
+        self.scale = self.head_dim**-0.5
+        hidden_channels = max(channels, int(round(channels * ffn_ratio)))
+        self.norm1 = nn.LayerNorm(channels)
+        self.qkv = nn.Linear(channels, 3 * channels)
+        self.proj = nn.Linear(channels, channels)
+        self.norm2 = nn.LayerNorm(channels)
+        self.ffn = nn.Sequential(
+            nn.Linear(channels, hidden_channels),
+            nn.GELU(),
+            nn.Linear(hidden_channels, channels),
+        )
+        self.gamma1 = nn.Parameter(torch.full((channels,), float(layer_scale_init)))
+        self.gamma2 = nn.Parameter(torch.full((channels,), float(layer_scale_init)))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply self-attention independently to the states of every spatial token."""
+        b, h, w, num_states, channels = x.shape
+        state_tokens = self.norm1(x).reshape(b * h * w, num_states, channels)
+        qkv = state_tokens.reshape(-1, num_states, channels)
+        qkv = self.qkv(qkv).view(-1, num_states, 3, self.num_heads, self.head_dim)
+        q, k, v = qkv.permute(2, 0, 3, 1, 4).unbind(dim=0)
+        attention = (q @ k.transpose(-2, -1)) * self.scale
+        attention = attention.float().softmax(dim=-1).to(dtype=v.dtype)
+        output = (attention @ v).transpose(1, 2).reshape(-1, num_states, channels)
+        output = self.proj(output).view(b, h, w, num_states, channels)
+        x = x + self.gamma1 * output
+        return x + self.gamma2 * self.ffn(self.norm2(x))
+
+
+class _MSATWindowSpatialLayer(nn.Module):
+    """Pre-normalized window self-attention and FFN over spatial tokens."""
+
+    def __init__(
+        self,
+        channels: int,
+        num_heads: int,
+        window_size: int,
+        ffn_ratio: float,
+        layer_scale_init: float,
+    ):
+        """Initialize a spatial window Transformer layer."""
+        super().__init__()
+        self.num_heads = num_heads
+        self.head_dim = channels // num_heads
+        self.scale = self.head_dim**-0.5
+        self.window_size = max(1, int(window_size))
+        self.window_tokens = self.window_size**2
+        hidden_channels = max(channels, int(round(channels * ffn_ratio)))
+
+        self.norm1 = nn.LayerNorm(channels)
+        self.qkv = nn.Linear(channels, 3 * channels)
+        self.proj = nn.Linear(channels, channels)
+        self.norm2 = nn.LayerNorm(channels)
+        self.ffn = nn.Sequential(
+            nn.Linear(channels, hidden_channels),
+            nn.GELU(),
+            nn.Linear(hidden_channels, channels),
+        )
+        self.gamma1 = nn.Parameter(torch.full((channels,), float(layer_scale_init)))
+        self.gamma2 = nn.Parameter(torch.full((channels,), float(layer_scale_init)))
+
+        relative_positions = (2 * self.window_size - 1) ** 2
+        self.relative_position_bias_table = nn.Parameter(torch.zeros(relative_positions, self.num_heads))
+        coords = torch.stack(
+            torch.meshgrid(torch.arange(self.window_size), torch.arange(self.window_size), indexing="ij")
+        ).flatten(1)
+        relative_coords = coords[:, :, None] - coords[:, None, :]
+        relative_coords = relative_coords.permute(1, 2, 0).contiguous()
+        relative_coords[:, :, 0] += self.window_size - 1
+        relative_coords[:, :, 1] += self.window_size - 1
+        relative_coords[:, :, 0] *= 2 * self.window_size - 1
+        self.register_buffer("relative_position_index", relative_coords.sum(-1), persistent=False)
+        nn.init.trunc_normal_(self.relative_position_bias_table, std=0.02)
+
+    def _partition(self, x: torch.Tensor) -> tuple[torch.Tensor, int, int]:
+        """Partition channels-last feature maps into flattened spatial windows."""
+        batch, height, width, channels = x.shape
+        pad_h = (self.window_size - height % self.window_size) % self.window_size
+        pad_w = (self.window_size - width % self.window_size) % self.window_size
+        if pad_h or pad_w:
+            x = F.pad(x, (0, 0, 0, pad_w, 0, pad_h))
+        padded_h, padded_w = height + pad_h, width + pad_w
+        x = x.view(
+            batch,
+            padded_h // self.window_size,
+            self.window_size,
+            padded_w // self.window_size,
+            self.window_size,
+            channels,
+        )
+        x = x.permute(0, 1, 3, 2, 4, 5).contiguous()
+        return x.view(-1, self.window_tokens, channels), pad_h, pad_w
+
+    def _reverse(
+        self,
+        windows: torch.Tensor,
+        batch: int,
+        height: int,
+        width: int,
+        pad_h: int,
+        pad_w: int,
+    ) -> torch.Tensor:
+        """Reverse flattened windows to channels-last feature maps."""
+        channels = windows.shape[-1]
+        padded_h, padded_w = height + pad_h, width + pad_w
+        x = windows.view(
+            batch,
+            padded_h // self.window_size,
+            padded_w // self.window_size,
+            self.window_size,
+            self.window_size,
+            channels,
+        )
+        x = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(batch, padded_h, padded_w, channels)
+        return x[:, :height, :width]
+
+    def _valid_window_tokens(
+        self,
+        reference: torch.Tensor,
+        batch: int,
+        height: int,
+        width: int,
+        pad_h: int,
+        pad_w: int,
+    ) -> torch.Tensor:
+        """Return the valid key positions for every possibly padded window."""
+        valid = reference.new_ones((1, height, width, 1))
+        if pad_h or pad_w:
+            valid = F.pad(valid, (0, 0, 0, pad_w, 0, pad_h), value=0)
+        padded_h, padded_w = height + pad_h, width + pad_w
+        valid = valid.view(
+            1,
+            padded_h // self.window_size,
+            self.window_size,
+            padded_w // self.window_size,
+            self.window_size,
+            1,
+        )
+        valid = valid.permute(0, 1, 3, 2, 4, 5).contiguous().view(-1, self.window_tokens)
+        return valid.bool().repeat(batch, 1)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply local spatial attention independently to every state."""
+        b, h, w, num_states, channels = x.shape
+        spatial_tokens = self.norm1(x).permute(0, 3, 1, 2, 4).reshape(b * num_states, h, w, channels)
+        windows, pad_h, pad_w = self._partition(spatial_tokens)
+        qkv = self.qkv(windows).view(-1, self.window_tokens, 3, self.num_heads, self.head_dim)
+        q, k, v = qkv.permute(2, 0, 3, 1, 4).unbind(dim=0)
+
+        attention = (q @ k.transpose(-2, -1)) * self.scale
+        relative_bias = self.relative_position_bias_table[self.relative_position_index.reshape(-1)]
+        relative_bias = relative_bias.view(self.window_tokens, self.window_tokens, self.num_heads)
+        relative_bias = relative_bias.permute(2, 0, 1).to(dtype=attention.dtype)
+        attention = attention + relative_bias.unsqueeze(0)
+
+        valid = self._valid_window_tokens(spatial_tokens, b * num_states, h, w, pad_h, pad_w)
+        attention = attention.masked_fill(~valid[:, None, None, :], torch.finfo(attention.dtype).min)
+        attention = attention.float().softmax(dim=-1).to(dtype=v.dtype)
+        output = (attention @ v).transpose(1, 2).reshape(-1, self.window_tokens, channels)
+        output = self.proj(output)
+        output = self._reverse(output, b * num_states, h, w, pad_h, pad_w)
+        output = output.view(b, num_states, h, w, channels).permute(0, 2, 3, 1, 4).contiguous()
+
+        x = x + self.gamma1 * output
+        return x + self.gamma2 * self.ffn(self.norm2(x))
+
+
+class _MSATStatePool(nn.Module):
+    """Pool multiple states into one target feature using cross-attention."""
+
+    def __init__(self, channels: int, num_heads: int, target: int):
+        """Initialize target-query attention pooling."""
+        super().__init__()
+        self.num_heads = num_heads
+        self.head_dim = channels // num_heads
+        self.scale = self.head_dim**-0.5
+        self.target = target
+        self.norm = nn.LayerNorm(channels)
+        self.q = nn.Linear(channels, channels)
+        self.kv = nn.Linear(channels, 2 * channels)
+        self.proj = nn.Linear(channels, channels)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Use the target state to attend to all states at each spatial location."""
+        b, h, w, num_states, channels = x.shape
+        states = self.norm(x).reshape(b * h * w, num_states, channels)
+        query = self.q(states[:, self.target : self.target + 1])
+        key, value = self.kv(states).chunk(2, dim=-1)
+        query = query.view(-1, 1, self.num_heads, self.head_dim).transpose(1, 2)
+        key = key.view(-1, num_states, self.num_heads, self.head_dim).transpose(1, 2)
+        value = value.view(-1, num_states, self.num_heads, self.head_dim).transpose(1, 2)
+        attention = (query @ key.transpose(-2, -1)) * self.scale
+        attention = attention.float().softmax(dim=-1).to(dtype=value.dtype)
+        pooled = (attention @ value).transpose(1, 2).reshape(-1, channels)
+        pooled = self.proj(pooled).view(b, h, w, channels)
+        return x[..., self.target, :] + pooled
+
+
+class MSAT(nn.Module):
+    """Multi-State Axial Transformer with state-first and windowed-spatial self-attention.
+
+    Input feature scales are aligned to the target resolution and retained as explicit states of each spatial token.
+    State MHSA first exchanges information across scales at the same location. Windowed spatial MHSA then exchanges
+    local evidence between locations while preserving the state axis. Target-query attention pools the states only
+    after both Transformer axes have completed.
+    """
+
+    def __init__(
+        self,
+        ch: list[int],
+        c2: int,
+        num_heads: int = 4,
+        target: int = -1,
+        embed_channels: int = 0,
+        ffn_ratio: float = 2.0,
+        window_size: int = 8,
+        shortcut: bool = True,
+        layer_scale_init: float = 1e-3,
+    ):
+        """Initialize MSAT V1.
+
+        Args:
+            ch (list[int]): Input channels; each input is one scale state.
+            c2 (int): Output channels.
+            num_heads (int): Number of state and spatial attention heads.
+            target (int): Input state defining output resolution and residual.
+            embed_channels (int): Internal Transformer width, or 0 to use min(c2, 256).
+            ffn_ratio (float): Hidden expansion ratio for Transformer FFNs.
+            window_size (int): Side length of each local spatial attention window.
+            shortcut (bool): Whether to add a residual from the target input.
+            layer_scale_init (float): Initial residual scale inside Transformer layers.
+        """
+        super().__init__()
+        if not ch:
+            raise ValueError("MSAT requires at least one input feature map.")
+        self.num_states = len(ch)
+        self.target = int(target) % self.num_states
+        channels = int(embed_channels) if int(embed_channels) > 0 else min(int(c2), 256)
+        heads = max(1, min(int(num_heads), channels))
+        while channels % heads:
+            heads -= 1
+        self.embed_channels = channels
+        self.num_heads = heads
+
+        self.input_proj = nn.ModuleList(
+            nn.Sequential(
+                Conv(input_channels, channels, 1),
+                Conv(channels, channels, 3, g=channels),
+            )
+            for input_channels in ch
+        )
+        self.state_embedding = nn.Parameter(torch.zeros(1, 1, 1, self.num_states, channels))
+        nn.init.trunc_normal_(self.state_embedding, std=0.02)
+        self.state_layer = _MSATStateLayer(channels, heads, ffn_ratio, layer_scale_init)
+        self.spatial_layer = _MSATWindowSpatialLayer(
+            channels,
+            heads,
+            window_size,
+            ffn_ratio,
+            layer_scale_init,
+        )
+        self.state_pool = _MSATStatePool(channels, heads, self.target)
+        self.pe = Conv(channels, channels, 3, g=channels, act=False)
+        self.proj = Conv(channels, c2, 1, act=False)
+        self.shortcut = (
+            nn.Identity()
+            if shortcut and ch[self.target] == c2
+            else Conv(ch[self.target], c2, 1, act=False)
+            if shortcut
+            else None
+        )
+        self.output_scale = nn.Parameter(torch.ones(())) if shortcut else None
+
+    @staticmethod
+    def _resize(x: torch.Tensor, size: tuple[int, int]) -> torch.Tensor:
+        """Resize a state with interpolation suited to its scale direction."""
+        if x.shape[-2:] == size:
+            return x
+        mode = "bilinear" if x.shape[-2] < size[0] or x.shape[-1] < size[1] else "area"
+        return F.interpolate(x, size=size, mode=mode, align_corners=False if mode == "bilinear" else None)
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
+        """Apply state MHSA, windowed spatial MHSA, and state-aware pooling."""
+        xs = [x] if isinstance(x, torch.Tensor) else list(x)
+        if len(xs) != self.num_states:
+            raise ValueError(f"MSAT expected {self.num_states} inputs, but received {len(xs)}.")
+        ref = xs[self.target]
+        size = ref.shape[-2:]
+        states = [
+            projection(self._resize(feature, size))
+            for projection, feature in zip(self.input_proj, xs)
+        ]
+        tokens = torch.stack(states, dim=1).permute(0, 3, 4, 1, 2).contiguous()
+        tokens = tokens + self.state_embedding
+        tokens = self.state_layer(tokens)
+        tokens = self.spatial_layer(tokens)
+        pooled = self.state_pool(tokens).permute(0, 3, 1, 2).contiguous()
+        target_state = tokens[..., self.target, :].permute(0, 3, 1, 2).contiguous()
+        output = self.proj(pooled + self.pe(target_state))
+        if self.shortcut is None:
+            return output
+        return self.shortcut(ref) + self.output_scale * output
 
 
 class PatchCSAR(CSAR):

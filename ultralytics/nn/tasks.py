@@ -43,6 +43,7 @@ from ultralytics.nn.modules import (
     CBLinear,
     CSAR,
     MultiStateCSAR,
+    MSAT,
     CrossScaleAttention,
     PatchCSAR,
     Classify,
@@ -1793,7 +1794,7 @@ def parse_model(d, ch, verbose=True):
             args = [ch[f]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
-        elif m in {CSAR, MultiStateCSAR, CrossScaleAttention, PatchCSAR, SCA, FSNetShuffle}:
+        elif m in {CSAR, MultiStateCSAR, MSAT, CrossScaleAttention, PatchCSAR, SCA, FSNetShuffle}:
             c2 = args[0]
             if c2 != nc:
                 c2 = make_divisible(min(c2, max_channels) * width, 8)
