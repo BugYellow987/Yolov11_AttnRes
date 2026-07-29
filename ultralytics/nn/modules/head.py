@@ -465,11 +465,29 @@ class Segment26MultiLabel(Segment26):
         """Initialize the multi-label-aware segmentation head and its loss weights."""
         if end2end:
             raise ValueError("Segment26MultiLabel does not support end2end mode.")
-        super().__init__(nc, nm, npr, reg_max, end2end, ch)
-        self.proto = Proto26MultiLabel(ch, self.npr, self.nm, nc)
+        if len(ch) < 2 or len(ch) % 2:
+            raise ValueError("Segment26MultiLabel expects equal lists of fused features and auxiliary logits.")
+        self.num_feature_levels = len(ch) // 2
+        feature_channels = ch[: self.num_feature_levels]
+        super().__init__(nc, nm, npr, reg_max, end2end, feature_channels)
+        self.proto = Proto26MultiLabel(feature_channels, self.npr, self.nm, nc)
         self.multilabel_gain = float(multilabel_gain)
         self.cooccurrence_weight = float(cooccurrence_weight)
         self.multilabel_aux = True
+
+    def forward(self, x: list[torch.Tensor]) -> tuple | list[torch.Tensor] | dict[str, torch.Tensor]:
+        """Return standard segmentation predictions plus explicit multi-label auxiliary logits."""
+        features = x[: self.num_feature_levels]
+        auxiliary_logits = x[self.num_feature_levels :]
+        outputs = Detect.forward(self, features)
+        preds = outputs[1] if isinstance(outputs, tuple) else outputs
+        proto = self.proto(features)
+        if isinstance(preds, dict):
+            preds["proto"] = proto
+            preds["multilabel_logits"] = auxiliary_logits
+        if self.training:
+            return preds
+        return (outputs, proto) if self.export else ((outputs[0], proto), preds)
 
 
 class OBB(Detect):

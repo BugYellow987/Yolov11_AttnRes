@@ -2177,9 +2177,9 @@ class _MSATMultiLabelAuxHead(nn.Module):
 class MSATMultiLabel(MSAT):
     """MSAT V2 with a class-conditioned multi-label auxiliary prediction for every spatial token.
 
-    This class is intentionally separate from MSAT V1. It preserves the same fused feature output for Segment26 while
-    retaining the post-Transformer states long enough for class-specific queries to predict overlapping damage labels.
-    The most recent auxiliary logits are consumed by v8MultiLabelSegmentationLoss during training and validation.
+    This class is intentionally separate from MSAT V1. It returns the fused feature and the state-derived auxiliary
+    logits as explicit graph outputs so training, validation, EMA, checkpointing, and export never depend on mutable
+    tensor attributes.
     """
 
     def __init__(
@@ -2215,11 +2215,13 @@ class MSATMultiLabel(MSAT):
             self.num_heads,
             self.num_classes,
         )
-        self.aux_logits: torch.Tensor | None = None
         self.is_multilabel_state_module = True
 
-    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
-        """Apply MSAT V2 and retain class-conditioned state logits for the auxiliary loss."""
+    def forward(
+        self,
+        x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return the fused target feature and class-conditioned state logits."""
         xs = [x] if isinstance(x, torch.Tensor) else list(x)
         if len(xs) != self.num_states:
             raise ValueError(f"MSATMultiLabel expected {self.num_states} inputs, but received {len(xs)}.")
@@ -2234,13 +2236,13 @@ class MSATMultiLabel(MSAT):
         tokens = self.state_layer(tokens)
         tokens = self.spatial_layer(tokens)
 
-        self.aux_logits = self.multi_label_head(tokens)
+        auxiliary_logits = self.multi_label_head(tokens)
         pooled = self.state_pool(tokens).permute(0, 3, 1, 2).contiguous()
         target_state = tokens[..., self.target, :].permute(0, 3, 1, 2).contiguous()
         output = self.proj(pooled + self.pe(target_state))
-        if self.shortcut is None:
-            return output
-        return self.shortcut(ref) + self.output_scale * output
+        if self.shortcut is not None:
+            output = self.shortcut(ref) + self.output_scale * output
+        return output, auxiliary_logits
 
 
 class PatchCSAR(CSAR):

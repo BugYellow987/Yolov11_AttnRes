@@ -663,18 +663,13 @@ class v8MultiLabelSegmentationLoss(v8SegmentationLoss):
         tal_topk: int = 10,
         tal_topk2: int | None = None,
     ):
-        """Initialize the standard segmentation loss and discover independent MSAT V2 modules."""
+        """Initialize the standard segmentation loss and multi-label weighting."""
         super().__init__(model, tal_topk, tal_topk2)
         if self.overlap:
             raise ValueError(
                 "MSAT multi-label co-occurrence training requires overlap_mask=False so overlapping instance masks "
                 "remain independently available."
             )
-        self.multilabel_modules = [
-            module for module in model.modules() if getattr(module, "is_multilabel_state_module", False)
-        ]
-        if not self.multilabel_modules:
-            raise ValueError("v8MultiLabelSegmentationLoss requires at least one MSATMultiLabel module.")
         head = model.model[-1]
         self.multilabel_gain = float(getattr(head, "multilabel_gain", 0.5))
         self.cooccurrence_weight = float(getattr(head, "cooccurrence_weight", 2.0))
@@ -725,19 +720,15 @@ class v8MultiLabelSegmentationLoss(v8SegmentationLoss):
         """Add state-derived multi-label co-occurrence loss to the semantic loss slot."""
         scaled_loss, detached_loss = super().loss(preds, batch)
         batch_size = preds["boxes"].shape[0]
+        auxiliary_logits = preds.get("multilabel_logits")
+        if not auxiliary_logits:
+            raise RuntimeError("Segment26MultiLabel did not receive explicit MSATMultiLabel auxiliary logits.")
         auxiliary_loss = torch.zeros((), device=self.device)
-        active_modules = 0
-        for module in self.multilabel_modules:
-            logits = module.aux_logits
-            if logits is None:
-                continue
+        for logits in auxiliary_logits:
             target = self.build_multilabel_target(batch, batch_size, logits.shape[-2:], logits.dtype)
             auxiliary_loss = auxiliary_loss + self._multi_label_loss(logits, target)
-            active_modules += 1
-        if not active_modules:
-            raise RuntimeError("MSATMultiLabel auxiliary logits were not produced before loss computation.")
 
-        auxiliary_loss = auxiliary_loss * (self.multilabel_gain / active_modules)
+        auxiliary_loss = auxiliary_loss * (self.multilabel_gain / len(auxiliary_logits))
         scaled_loss[4] += auxiliary_loss * batch_size
         detached_loss[4] += auxiliary_loss.detach()
         return scaled_loss, detached_loss

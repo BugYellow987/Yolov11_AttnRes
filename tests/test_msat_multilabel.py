@@ -1,6 +1,7 @@
 # Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 """Tests for class-conditioned multi-label supervision in MSAT V2."""
 
+from copy import deepcopy
 from pathlib import Path
 
 import torch
@@ -9,6 +10,7 @@ from ultralytics.cfg import get_cfg
 from ultralytics.nn.modules import MSAT, MSATMultiLabel, MultiStateCSAR, Segment26MultiLabel
 from ultralytics.nn.tasks import SegmentationModel
 from ultralytics.utils.loss import v8MultiLabelSegmentationLoss
+from ultralytics.utils.torch_utils import ModelEMA
 
 
 MODEL_CFG = Path("ultralytics/cfg/models/11_myself/yolo11-MSAT-V2-MultiLabel.yaml")
@@ -46,6 +48,13 @@ def test_msat_multilabel_target_loss_backward():
     batch = _overlapping_batch()
 
     predictions = model(batch["img"])
+    assert [tuple(logits.shape) for logits in predictions["multilabel_logits"]] == [
+        (1, 3, 16, 16),
+        (1, 3, 32, 32),
+        (1, 3, 8, 8),
+        (1, 3, 4, 4),
+        (1, 3, 2, 2),
+    ]
     criterion = model.init_criterion()
     assert isinstance(criterion, v8MultiLabelSegmentationLoss)
     target = criterion.build_multilabel_target(batch, 1, (32, 32), torch.float32)
@@ -87,3 +96,27 @@ def test_msat_multilabel_requires_independent_masks():
         assert "overlap_mask=False" in str(error)
     else:
         raise AssertionError("Expected multi-label loss initialization to reject overlap_mask=True.")
+
+
+def test_msat_multilabel_supports_ema_deepcopy():
+    """Verify explicit auxiliary outputs never leave graph tensors in module state before EMA construction."""
+    model = SegmentationModel(MODEL_CFG, ch=3, nc=3, verbose=False)
+    model.args = get_cfg()
+    model.args.overlap_mask = False
+    model.train()
+    batch = _overlapping_batch()
+    predictions = model(batch["img"])
+    assert "multilabel_logits" in predictions
+    ema = ModelEMA(model)
+    assert ema.ema is not model
+
+    train_loss, _ = model.loss(batch)
+    assert torch.isfinite(train_loss).all()
+    deepcopy(model)
+
+    ema.ema.eval()
+    with torch.no_grad():
+        validation_predictions = ema.ema(batch["img"])
+        validation_loss, _ = ema.ema.loss(batch, validation_predictions)
+    assert torch.isfinite(validation_loss).all()
+    deepcopy(ema.ema)
