@@ -44,6 +44,7 @@ from ultralytics.nn.modules import (
     CSAR,
     MultiStateCSAR,
     MSAT,
+    MSATMultiLabel,
     CrossScaleAttention,
     PatchCSAR,
     Classify,
@@ -75,6 +76,7 @@ from ultralytics.nn.modules import (
     SCDown,
     Segment,
     Segment26,
+    Segment26MultiLabel,
     SCA,
     SemanticSegment,
     TorchVision,
@@ -95,6 +97,7 @@ from ultralytics.utils.loss import (
     v8OBBLoss,
     v8PoseLoss,
     v8SegmentationLoss,
+    v8MultiLabelSegmentationLoss,
 )
 from ultralytics.utils.ops import make_divisible
 from ultralytics.utils.patches import torch_load
@@ -591,7 +594,12 @@ class SegmentationModel(DetectionModel):
 
     def init_criterion(self):
         """Initialize the loss criterion for the SegmentationModel."""
-        return E2ELoss(self, v8SegmentationLoss) if getattr(self, "end2end", False) else v8SegmentationLoss(self)
+        loss_class = (
+            v8MultiLabelSegmentationLoss
+            if isinstance(self.model[-1], Segment26MultiLabel)
+            else v8SegmentationLoss
+        )
+        return E2ELoss(self, loss_class) if getattr(self, "end2end", False) else loss_class(self)
 
 
 class SemanticSegmentationModel(BaseModel):
@@ -1794,7 +1802,7 @@ def parse_model(d, ch, verbose=True):
             args = [ch[f]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
-        elif m in {CSAR, MultiStateCSAR, MSAT, CrossScaleAttention, PatchCSAR, SCA, FSNetShuffle}:
+        elif m in {CSAR, MultiStateCSAR, MSAT, MSATMultiLabel, CrossScaleAttention, PatchCSAR, SCA, FSNetShuffle}:
             c2 = args[0]
             if c2 != nc:
                 c2 = make_divisible(min(c2, max_channels) * width, 8)
@@ -1807,6 +1815,7 @@ def parse_model(d, ch, verbose=True):
                 YOLOEDetect,
                 Segment,
                 Segment26,
+                Segment26MultiLabel,
                 YOLOESegment,
                 YOLOESegment26,
                 Pose,
@@ -1816,9 +1825,21 @@ def parse_model(d, ch, verbose=True):
             }
         ):
             args.extend([reg_max, end2end, [ch[x] for x in f]])
-            if m is Segment or m is YOLOESegment or m is Segment26 or m is YOLOESegment26:
+            if m in {Segment, YOLOESegment, Segment26, Segment26MultiLabel, YOLOESegment26}:
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
-            if m in {Detect, YOLOEDetect, Segment, Segment26, YOLOESegment, YOLOESegment26, Pose, Pose26, OBB, OBB26}:
+            if m in {
+                Detect,
+                YOLOEDetect,
+                Segment,
+                Segment26,
+                Segment26MultiLabel,
+                YOLOESegment,
+                YOLOESegment26,
+                Pose,
+                Pose26,
+                OBB,
+                OBB26,
+            }:
                 m.legacy = legacy
         elif m is SemanticSegment:
             args.append([ch[x] for x in f])  # nc, ch tuple

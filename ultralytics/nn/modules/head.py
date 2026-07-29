@@ -15,7 +15,18 @@ from ultralytics.utils import NOT_MACOS14
 from ultralytics.utils.tal import dist2bbox, dist2rbox, make_anchors
 from ultralytics.utils.torch_utils import TORCH_1_11, fuse_conv_and_bn, smart_inference_mode
 
-from .block import DFL, SAVPE, BNContrastiveHead, ContrastiveHead, Proto, Proto26, RealNVP, Residual, SwiGLUFFN
+from .block import (
+    DFL,
+    SAVPE,
+    BNContrastiveHead,
+    ContrastiveHead,
+    Proto,
+    Proto26,
+    Proto26MultiLabel,
+    RealNVP,
+    Residual,
+    SwiGLUFFN,
+)
 from .conv import Conv, DWConv
 from .transformer import MLP, DeformableTransformerDecoder, DeformableTransformerDecoderLayer
 from .utils import bias_init_with_prob, linear_init
@@ -27,6 +38,7 @@ __all__ = (
     "Pose",
     "RTDETRDecoder",
     "Segment",
+    "Segment26MultiLabel",
     "SemanticSegment",
     "YOLOEDetect",
     "YOLOESegment",
@@ -434,6 +446,30 @@ class Segment26(Segment):
         super().fuse()
         if hasattr(self.proto, "fuse"):
             self.proto.fuse()
+
+
+class Segment26MultiLabel(Segment26):
+    """Independent Segment26 head for MSAT multi-label co-occurrence supervision."""
+
+    def __init__(
+        self,
+        nc: int = 80,
+        nm: int = 32,
+        npr: int = 256,
+        multilabel_gain: float = 0.5,
+        cooccurrence_weight: float = 2.0,
+        reg_max=16,
+        end2end=False,
+        ch: tuple = (),
+    ):
+        """Initialize the multi-label-aware segmentation head and its loss weights."""
+        if end2end:
+            raise ValueError("Segment26MultiLabel does not support end2end mode.")
+        super().__init__(nc, nm, npr, reg_max, end2end, ch)
+        self.proto = Proto26MultiLabel(ch, self.npr, self.nm, nc)
+        self.multilabel_gain = float(multilabel_gain)
+        self.cooccurrence_weight = float(cooccurrence_weight)
+        self.multilabel_aux = True
 
 
 class OBB(Detect):

@@ -33,6 +33,7 @@ __all__ = (
     "CSAR",
     "MultiStateCSAR",
     "MSAT",
+    "MSATMultiLabel",
     "CrossScaleAttention",
     "PatchCSAR",
     "FSAttentionResiduals",
@@ -58,6 +59,7 @@ __all__ = (
     "HGStem",
     "ImagePoolingAttn",
     "Proto",
+    "Proto26MultiLabel",
     "RepC3",
     "RepNCSPELAN4",
     "RepVGGDW",
@@ -2143,6 +2145,104 @@ class MSAT(nn.Module):
         return self.shortcut(ref) + self.output_scale * output
 
 
+class _MSATMultiLabelAuxHead(nn.Module):
+    """Class-conditioned state readout for independent per-pixel damage labels."""
+
+    def __init__(self, channels: int, num_heads: int, num_classes: int):
+        """Initialize class queries and state-evidence projections."""
+        super().__init__()
+        self.num_heads = num_heads
+        self.num_classes = num_classes
+        self.head_dim = channels // num_heads
+        self.scale = self.head_dim**-0.5
+        self.norm = nn.LayerNorm(channels)
+        self.key = nn.Linear(channels, channels)
+        self.evidence = nn.Linear(channels, num_classes)
+        self.class_queries = nn.Parameter(torch.empty(num_heads, num_classes, self.head_dim))
+        self.class_bias = nn.Parameter(torch.zeros(num_classes))
+        nn.init.trunc_normal_(self.class_queries, std=0.02)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Predict independent class logits by attending each class query over the state axis."""
+        b, h, w, num_states, channels = x.shape
+        states = self.norm(x).reshape(b * h * w, num_states, channels)
+        keys = self.key(states).view(-1, num_states, self.num_heads, self.head_dim).permute(0, 2, 1, 3)
+        attention = torch.einsum("hcd,nhsd->nhcs", self.class_queries, keys) * self.scale
+        attention = attention.float().softmax(dim=-1).to(dtype=states.dtype).mean(dim=1)
+        evidence = self.evidence(states).transpose(1, 2)
+        logits = (attention * evidence).sum(dim=-1) + self.class_bias
+        return logits.view(b, h, w, self.num_classes).permute(0, 3, 1, 2).contiguous()
+
+
+class MSATMultiLabel(MSAT):
+    """MSAT V2 with a class-conditioned multi-label auxiliary prediction for every spatial token.
+
+    This class is intentionally separate from MSAT V1. It preserves the same fused feature output for Segment26 while
+    retaining the post-Transformer states long enough for class-specific queries to predict overlapping damage labels.
+    The most recent auxiliary logits are consumed by v8MultiLabelSegmentationLoss during training and validation.
+    """
+
+    def __init__(
+        self,
+        ch: list[int],
+        c2: int,
+        num_classes: int,
+        num_heads: int = 4,
+        target: int = -1,
+        embed_channels: int = 0,
+        ffn_ratio: float = 2.0,
+        window_size: int = 8,
+        shortcut: bool = True,
+        layer_scale_init: float = 1e-3,
+    ):
+        """Initialize MSAT V2 without changing the MSAT V1 implementation."""
+        super().__init__(
+            ch,
+            c2,
+            num_heads,
+            target,
+            embed_channels,
+            ffn_ratio,
+            window_size,
+            shortcut,
+            layer_scale_init,
+        )
+        if int(num_classes) < 1:
+            raise ValueError("MSATMultiLabel requires at least one damage class.")
+        self.num_classes = int(num_classes)
+        self.multi_label_head = _MSATMultiLabelAuxHead(
+            self.embed_channels,
+            self.num_heads,
+            self.num_classes,
+        )
+        self.aux_logits: torch.Tensor | None = None
+        self.is_multilabel_state_module = True
+
+    def forward(self, x: list[torch.Tensor] | tuple[torch.Tensor, ...] | torch.Tensor) -> torch.Tensor:
+        """Apply MSAT V2 and retain class-conditioned state logits for the auxiliary loss."""
+        xs = [x] if isinstance(x, torch.Tensor) else list(x)
+        if len(xs) != self.num_states:
+            raise ValueError(f"MSATMultiLabel expected {self.num_states} inputs, but received {len(xs)}.")
+        ref = xs[self.target]
+        size = ref.shape[-2:]
+        states = [
+            projection(self._resize(feature, size))
+            for projection, feature in zip(self.input_proj, xs)
+        ]
+        tokens = torch.stack(states, dim=1).permute(0, 3, 4, 1, 2).contiguous()
+        tokens = tokens + self.state_embedding
+        tokens = self.state_layer(tokens)
+        tokens = self.spatial_layer(tokens)
+
+        self.aux_logits = self.multi_label_head(tokens)
+        pooled = self.state_pool(tokens).permute(0, 3, 1, 2).contiguous()
+        target_state = tokens[..., self.target, :].permute(0, 3, 1, 2).contiguous()
+        output = self.proj(pooled + self.pe(target_state))
+        if self.shortcut is None:
+            return output
+        return self.shortcut(ref) + self.output_scale * output
+
+
 class PatchCSAR(CSAR):
     """Overlapping patch-based Cross-Scale Attention Residual fusion.
 
@@ -3238,6 +3338,31 @@ class Proto26(Proto):
         self.semseg = None
         self.heatmap = None
         self.seedmap = None
+
+
+class Proto26MultiLabel(Proto26):
+    """Proto26 variant that leaves semantic supervision to the MSAT multi-label state heads."""
+
+    def __init__(self, ch: tuple = (), c_: int = 256, c2: int = 32, nc: int = 80):
+        """Initialize multi-scale prototypes without the mutually exclusive semantic branch."""
+        super().__init__(ch, c_, c2, nc)
+        self.semseg = None
+
+    def forward(self, x: list[torch.Tensor]) -> torch.Tensor:
+        """Fuse multi-scale features and return prototypes plus compatible dense localization targets."""
+        feat = x[0]
+        for i, refine in enumerate(self.feat_refine):
+            up_feat = refine(x[i + 1])
+            up_feat = F.interpolate(up_feat, size=feat.shape[2:], mode="nearest")
+            feat = feat + up_feat
+        prototypes = Proto.forward(self, self.feat_fuse(feat))
+        if self.training:
+            dense = {
+                "heatmap": self.heatmap(feat),
+                "seedmap": self.seedmap(feat),
+            }
+            return prototypes, dense
+        return prototypes
 
 
 class RealNVP(nn.Module):

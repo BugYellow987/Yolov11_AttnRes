@@ -654,6 +654,95 @@ class v8SegmentationLoss(v8DetectionLoss):
         return loss / fg_mask.sum()
 
 
+class v8MultiLabelSegmentationLoss(v8SegmentationLoss):
+    """Segmentation loss with state-derived multi-label supervision for overlapping damage classes."""
+
+    def __init__(
+        self,
+        model: torch.nn.Module,
+        tal_topk: int = 10,
+        tal_topk2: int | None = None,
+    ):
+        """Initialize the standard segmentation loss and discover independent MSAT V2 modules."""
+        super().__init__(model, tal_topk, tal_topk2)
+        if self.overlap:
+            raise ValueError(
+                "MSAT multi-label co-occurrence training requires overlap_mask=False so overlapping instance masks "
+                "remain independently available."
+            )
+        self.multilabel_modules = [
+            module for module in model.modules() if getattr(module, "is_multilabel_state_module", False)
+        ]
+        if not self.multilabel_modules:
+            raise ValueError("v8MultiLabelSegmentationLoss requires at least one MSATMultiLabel module.")
+        head = model.model[-1]
+        self.multilabel_gain = float(getattr(head, "multilabel_gain", 0.5))
+        self.cooccurrence_weight = float(getattr(head, "cooccurrence_weight", 2.0))
+        self.multilabel_dice = MultiChannelDiceLoss(smooth=1)
+
+    def build_multilabel_target(
+        self,
+        batch: dict[str, torch.Tensor],
+        batch_size: int,
+        size: tuple[int, int],
+        dtype: torch.dtype,
+    ) -> torch.Tensor:
+        """Rasterize independent instance masks into a multi-hot per-pixel class target."""
+        target = torch.zeros((batch_size, self.nc, *size), device=self.device, dtype=dtype)
+        masks = batch["masks"].to(self.device).float()
+        classes = batch["cls"].view(-1).to(self.device).long()
+        batch_indices = batch["batch_idx"].view(-1).to(self.device).long()
+        if masks.ndim != 3 or masks.shape[0] != classes.numel():
+            raise ValueError(
+                "MSAT multi-label targets require one binary mask per instance; train with overlap_mask=False."
+            )
+        if not masks.shape[0]:
+            return target
+
+        masks = masks[:, None]
+        if masks.shape[-2] >= size[0] and masks.shape[-1] >= size[1]:
+            masks = F.adaptive_max_pool2d(masks, size)
+        else:
+            masks = F.interpolate(masks, size=size, mode="nearest")
+        valid_classes = (classes >= 0) & (classes < self.nc)
+        class_maps = F.one_hot(classes.clamp(0, self.nc - 1), num_classes=self.nc).to(dtype=dtype)
+        class_maps = class_maps[:, :, None, None] * masks.to(dtype=dtype)
+        for image_index in range(batch_size):
+            selected = (batch_indices == image_index) & valid_classes
+            if selected.any():
+                target[image_index] = class_maps[selected].amax(dim=0)
+        return target
+
+    def _multi_label_loss(self, logits: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        """Combine co-occurrence-weighted BCE with class-wise Dice loss."""
+        bce = F.binary_cross_entropy_with_logits(logits, target, reduction="none")
+        overlap = target.sum(dim=1, keepdim=True).gt(1).to(dtype=bce.dtype)
+        pixel_weight = 1.0 + self.cooccurrence_weight * overlap
+        weighted_bce = (bce * pixel_weight).sum() / (pixel_weight.sum() * self.nc).clamp_min(1.0)
+        return 0.5 * weighted_bce + 0.5 * self.multilabel_dice(logits, target)
+
+    def loss(self, preds: dict[str, torch.Tensor], batch: dict[str, torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
+        """Add state-derived multi-label co-occurrence loss to the semantic loss slot."""
+        scaled_loss, detached_loss = super().loss(preds, batch)
+        batch_size = preds["boxes"].shape[0]
+        auxiliary_loss = torch.zeros((), device=self.device)
+        active_modules = 0
+        for module in self.multilabel_modules:
+            logits = module.aux_logits
+            if logits is None:
+                continue
+            target = self.build_multilabel_target(batch, batch_size, logits.shape[-2:], logits.dtype)
+            auxiliary_loss = auxiliary_loss + self._multi_label_loss(logits, target)
+            active_modules += 1
+        if not active_modules:
+            raise RuntimeError("MSATMultiLabel auxiliary logits were not produced before loss computation.")
+
+        auxiliary_loss = auxiliary_loss * (self.multilabel_gain / active_modules)
+        scaled_loss[4] += auxiliary_loss * batch_size
+        detached_loss[4] += auxiliary_loss.detach()
+        return scaled_loss, detached_loss
+
+
 class v8PoseLoss(v8DetectionLoss):
     """Criterion class for computing training losses for YOLOv8 pose estimation."""
 
