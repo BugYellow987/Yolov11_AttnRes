@@ -20,6 +20,8 @@ __all__ = (
     "DWConvTranspose2d",
     "Focus",
     "GhostConv",
+    "IIMStem",
+    "IlluminationInvariantConv",
     "Index",
     "LightConv",
     "RepConv",
@@ -87,6 +89,103 @@ class Conv(nn.Module):
             (torch.Tensor): Output tensor.
         """
         return self.act(self.conv(x))
+
+
+class IlluminationInvariantConv(nn.Module):
+    """Extract YOLA illumination-invariant features with shared zero-mean kernels.
+
+    The module applies the same learnable spatial kernels to logarithmic RGB channels and returns the pairwise
+    R-G, G-B, and R-B responses. Subtracting the spatial mean from every kernel preserves the zero-mean constraint
+    proposed by YOLA without requiring an optimizer hook or a separate parameter projection step.
+    """
+
+    def __init__(self, kernel_nums=8, kernel_size=3, eps=1e-7):
+        """Initialize the illumination-invariant feature extractor.
+
+        Args:
+            kernel_nums (int): Number of learnable kernels used for each color-channel pair.
+            kernel_size (int): Odd spatial kernel size.
+            eps (float): Lower bound applied before taking the logarithm.
+        """
+        super().__init__()
+        if kernel_nums < 1:
+            raise ValueError(f"kernel_nums must be positive, but received {kernel_nums}.")
+        if kernel_size < 1 or kernel_size % 2 == 0:
+            raise ValueError(f"kernel_size must be a positive odd integer, but received {kernel_size}.")
+
+        self.kernel_nums = kernel_nums
+        self.kernel_size = kernel_size
+        self.eps = eps
+        self.weight = nn.Parameter(torch.empty(kernel_nums, 1, kernel_size, kernel_size))
+        self.rg_bn = nn.BatchNorm2d(kernel_nums)
+        self.gb_bn = nn.BatchNorm2d(kernel_nums)
+        self.rb_bn = nn.BatchNorm2d(kernel_nums)
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        """Initialize kernels and keep invariant features low-amplitude at the start of training."""
+        nn.init.kaiming_normal_(self.weight)
+        for bn in (self.rg_bn, self.gb_bn, self.rb_bn):
+            nn.init.constant_(bn.weight, 0.01)
+            nn.init.zeros_(bn.bias)
+
+    def zero_mean_weight(self):
+        """Return kernels projected onto the zero-spatial-mean constraint."""
+        return self.weight - self.weight.mean(dim=(2, 3), keepdim=True)
+
+    def forward(self, x):
+        """Extract illumination-invariant features from an RGB tensor in the [0, 1] range."""
+        if x.shape[1] != 3:
+            raise ValueError(f"IlluminationInvariantConv requires RGB input with 3 channels, but received {x.shape[1]}.")
+
+        zero_mask = x == 0
+        log_rgb = x.clamp_min(self.eps).log().split(1, dim=1)
+        weight = self.zero_mean_weight()
+        padding = self.kernel_size // 2
+
+        def color_difference(first, second):
+            return torch.nn.functional.conv2d(first, weight, padding=padding) - torch.nn.functional.conv2d(
+                second, weight, padding=padding
+            )
+
+        rg = self.rg_bn(color_difference(log_rgb[0], log_rgb[1]))
+        gb = self.gb_bn(color_difference(log_rgb[1], log_rgb[2]))
+        rb = self.rb_bn(color_difference(log_rgb[0], log_rgb[2]))
+
+        # Match the reference YOLA implementation by suppressing responses originating from exact zero-valued pixels.
+        rg = rg.masked_fill(zero_mask[:, 0:1].expand_as(rg), 0)
+        gb = gb.masked_fill(zero_mask[:, 1:2].expand_as(gb), 0)
+        rb = rb.masked_fill(zero_mask[:, 2:3].expand_as(rb), 0)
+        return torch.cat((rg, gb, rb), dim=1)
+
+
+class IIMStem(nn.Module):
+    """Dual-branch RGB and YOLA IIM stem followed by 1x1 feature fusion."""
+
+    def __init__(self, c1, c2, k=3, s=2, kernel_nums=8, kernel_size=3):
+        """Initialize an RGB stem and a parallel illumination-invariant stem.
+
+        Args:
+            c1 (int): Number of input channels; must be 3 for RGB.
+            c2 (int): Number of fused output channels.
+            k (int): Kernel size of each downsampling stem.
+            s (int): Stride of each downsampling stem.
+            kernel_nums (int): Number of learnable IIM kernels per color pair.
+            kernel_size (int): Spatial size of each IIM kernel.
+        """
+        super().__init__()
+        if c1 != 3:
+            raise ValueError(f"IIMStem requires RGB input with 3 channels, but received {c1}.")
+        rgb_channels = c2 // 2
+        iim_channels = c2 - rgb_channels
+        self.rgb_stem = Conv(c1, rgb_channels, k, s)
+        self.iim = IlluminationInvariantConv(kernel_nums, kernel_size)
+        self.iim_stem = Conv(3 * kernel_nums, iim_channels, k, s)
+        self.fuse = Conv(c2, c2, 1, 1)
+
+    def forward(self, x):
+        """Fuse raw RGB and illumination-invariant stem features."""
+        return self.fuse(torch.cat((self.rgb_stem(x), self.iim_stem(self.iim(x))), dim=1))
 
 
 class Conv2(Conv):

@@ -1,3 +1,4 @@
+#將bbox格式轉換成Segment，仍然是4點矩形
 """Generate YOLO segmentation pseudo-labels from YOLO bbox labels.
 
 This script is intended for weakly supervised experiments where only bounding
