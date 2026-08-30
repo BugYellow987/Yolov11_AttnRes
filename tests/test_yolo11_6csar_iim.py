@@ -40,6 +40,7 @@ def test_yolo11_6csar_iim_model_graph_and_forward():
     assert model.model[-2].target == 0
     assert isinstance(model.model[-1], Segment26)
     assert model.model[-1].f == [21, 18, 19, 20]
+    assert model.model[-1].proto_index == 1
     assert model.stride.tolist() == [4.0, 8.0, 16.0, 32.0]
 
     model.eval()
@@ -49,4 +50,4 @@ def test_yolo11_6csar_iim_model_graph_and_forward():
         stem_output = model.model[0](image)
         output = model(image)
     assert torch.equal(stem_output, appearance)
-    assert output[0][1].shape == (1, 32, image.shape[-2] // 2, image.shape[-1] // 2)
+    assert output[0][1].shape == (1, 32, image.shape[-2] // 4, image.shape[-1] // 4)

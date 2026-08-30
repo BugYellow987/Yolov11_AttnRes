@@ -1826,9 +1826,12 @@ def parse_model(d, ch, verbose=True):
                 OBB26,
             }
         ):
+            proto_index = args.pop(3) if m is Segment26 and len(args) > 3 else 0
             args.extend([reg_max, end2end, [ch[x] for x in f]])
             if m in {Segment, YOLOESegment, Segment26, Segment26MultiLabel, YOLOESegment26}:
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
+            if m is Segment26:
+                args.append(proto_index)
             if m in {
                 Detect,
                 YOLOEDetect,

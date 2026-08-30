@@ -386,6 +386,7 @@ class Segment26(Segment):
     Attributes:
         nm (int): Number of masks.
         npr (int): Number of protos.
+        proto_index (int): First detection feature level used for prototype generation.
         proto (Proto26): Prototype generation module.
         cv4 (nn.ModuleList): Convolution layers for mask coefficients.
 
@@ -399,7 +400,16 @@ class Segment26(Segment):
         >>> outputs = segment(x)
     """
 
-    def __init__(self, nc: int = 80, nm: int = 32, npr: int = 256, reg_max=16, end2end=False, ch: tuple = ()):
+    def __init__(
+        self,
+        nc: int = 80,
+        nm: int = 32,
+        npr: int = 256,
+        reg_max=16,
+        end2end=False,
+        ch: tuple = (),
+        proto_index: int = 0,
+    ):
         """Initialize the YOLO model attributes such as the number of masks, prototypes, and the convolution layers.
 
         Args:
@@ -409,15 +419,23 @@ class Segment26(Segment):
             reg_max (int): Maximum number of DFL channels.
             end2end (bool): Whether to use end-to-end NMS-free detection.
             ch (tuple): Tuple of channel sizes from backbone feature maps.
+            proto_index (int): First feature index used by Proto26. Detection still uses every feature in ``ch``.
         """
         super().__init__(nc, nm, npr, reg_max, end2end, ch)
-        self.proto = Proto26(ch, self.npr, self.nm, nc)  # protos
+        if not ch:
+            raise ValueError("Segment26 requires at least one feature level.")
+        proto_index = int(proto_index)
+        if not -len(ch) <= proto_index < len(ch):
+            raise ValueError(f"Segment26 proto_index={proto_index} is invalid for {len(ch)} feature levels.")
+        self.proto_index = proto_index % len(ch)
+        self.proto = Proto26(ch[self.proto_index :], self.npr, self.nm, nc)  # protos
 
     def forward(self, x: list[torch.Tensor]) -> tuple | list[torch.Tensor] | dict[str, torch.Tensor]:
         """Return model outputs and mask coefficients if training, otherwise return outputs and mask coefficients."""
         outputs = Detect.forward(self, x)
         preds = outputs[1] if isinstance(outputs, tuple) else outputs
-        proto = self.proto(x)  # mask protos
+        proto_index = getattr(self, "proto_index", 0)  # compatibility with checkpoints saved before proto selection
+        proto = self.proto(x[proto_index:])  # mask protos
         if isinstance(preds, dict):  # training and validating during training
             if self.end2end:
                 preds["one2many"]["proto"] = proto

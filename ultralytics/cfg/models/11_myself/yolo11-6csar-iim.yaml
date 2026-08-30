@@ -52,4 +52,5 @@ head:
   # P2 uses refined P3/P4 context to compare local dent shading against the larger-scale parallel rib structure.
   - [[3, 18, 19], 1, CSAR, [128, 4, 0, 0.5, True]]  # 21-P2/4, context-fused P2(P2, P3, P4)
 
-  - [[21, 18, 19, 20], 1, Segment26, [nc, 32, 256]]  # 22-Segment26(P2, P3, P4, P5)
+  # Detection uses P2/P3/P4/P5; proto_index=1 keeps Proto26 on P3/P4/P5 at mask_ratio=4 resolution.
+  - [[21, 18, 19, 20], 1, Segment26, [nc, 32, 256, 1]]  # 22-Segment26(P2, P3, P4, P5)
