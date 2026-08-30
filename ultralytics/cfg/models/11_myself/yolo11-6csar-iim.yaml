@@ -1,5 +1,4 @@
-# Ultralytics YOLO11 instance segmentation model with a YOLA IIM front-end and the 6-CSAR architecture.
-# Based on yolo11-6csar.yaml. The layer count is unchanged so all CSAR and Segment26 indices remain stable.
+# Ultralytics YOLO11 instance segmentation model with a residual YOLA IIM front-end and P2-aware 6-CSAR architecture.
 
 # Parameters
 nc: 80 # number of classes
@@ -11,11 +10,11 @@ scales: # model compound scaling constants
   l: [1.00, 1.00, 512]
   x: [1.00, 1.50, 512]
 
-# YOLO11-FSNetShuffle backbone with an illumination-invariant front-end.
-# IIMStem: RGB stem || YOLA IIM (8 shared zero-mean 3x3 kernels per RGB pair) -> Concat -> 1x1 Conv.
+# YOLO11-FSNetShuffle backbone with an illumination-invariant residual front-end.
+# IIMStem: full-width RGB/luminance stem + gated YOLA IIM residual (8 shared zero-mean 3x3 kernels per RGB pair).
 backbone:
   # [from, repeats, module, args]
-  - [-1, 1, IIMStem, [64, 3, 2, 8, 3]]        # 0-P1/2, dual RGB/IIM stem and 1x1 fusion
+  - [-1, 1, IIMStem, [64, 3, 2, 8, 3]]        # 0-P1/2, complete RGB main path + IIM residual
   - [-1, 1, Conv, [128, 3, 2]]                 # 1-P2/4 (main P2 Conv)
 
   # P2 fusion
@@ -50,4 +49,7 @@ head:
   - [[3, 15, 16, 17], 1, CSAR, [512, 4, 2, 0.5, True]]   # 19-P4/16
   - [[3, 15, 16, 17], 1, CSAR, [1024, 4, 3, 0.5, True]]  # 20-P5/32
 
-  - [[18, 19, 20], 1, Segment26, [nc, 32, 256]]  # 21-Segment26(P3, P4, P5)
+  # P2 uses refined P3/P4 context to compare local dent shading against the larger-scale parallel rib structure.
+  - [[3, 18, 19], 1, CSAR, [128, 4, 0, 0.5, True]]  # 21-P2/4, context-fused P2(P2, P3, P4)
+
+  - [[21, 18, 19, 20], 1, Segment26, [nc, 32, 256]]  # 22-Segment26(P2, P3, P4, P5)

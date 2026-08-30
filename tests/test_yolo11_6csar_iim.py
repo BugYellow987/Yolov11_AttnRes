@@ -5,7 +5,7 @@ from pathlib import Path
 
 import torch
 
-from ultralytics.nn.modules import IIMStem, IlluminationInvariantConv, Segment26
+from ultralytics.nn.modules import CSAR, IIMStem, IlluminationInvariantConv, Segment26
 from ultralytics.nn.tasks import SegmentationModel
 
 
@@ -27,18 +27,26 @@ def test_iim_zero_mean_constraint_and_illumination_invariance():
 
 
 def test_yolo11_6csar_iim_model_graph_and_forward():
-    """Verify the IIM stem, inherited head indices, and output prototype resolution."""
+    """Verify the residual IIM stem, context-aware P2 head, and prototype resolution."""
     model = SegmentationModel(MODEL_CFG, ch=3, nc=3, verbose=False)
 
     assert isinstance(model.model[0], IIMStem)
     assert model.model[0].iim.kernel_nums == 8
     assert model.model[0].iim.kernel_size == 3
+    assert model.model[0].rgb_stem.conv.out_channels == model.model[0].iim_stem.conv.out_channels
+    assert model.model[0].iim_gain.item() == 0.0
+    assert isinstance(model.model[-2], CSAR)
+    assert model.model[-2].f == [3, 18, 19]
+    assert model.model[-2].target == 0
     assert isinstance(model.model[-1], Segment26)
-    assert model.model[-1].f == [18, 19, 20]
-    assert model.stride.tolist() == [8.0, 16.0, 32.0]
+    assert model.model[-1].f == [21, 18, 19, 20]
+    assert model.stride.tolist() == [4.0, 8.0, 16.0, 32.0]
 
     model.eval()
     image = torch.rand(1, 3, 128, 192)
     with torch.no_grad():
+        appearance = model.model[0].rgb_stem(image)
+        stem_output = model.model[0](image)
         output = model(image)
-    assert output[0][1].shape == (1, 32, image.shape[-2] // 4, image.shape[-1] // 4)
+    assert torch.equal(stem_output, appearance)
+    assert output[0][1].shape == (1, 32, image.shape[-2] // 2, image.shape[-1] // 2)

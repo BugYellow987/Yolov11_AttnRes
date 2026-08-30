@@ -160,14 +160,14 @@ class IlluminationInvariantConv(nn.Module):
 
 
 class IIMStem(nn.Module):
-    """Dual-branch RGB and YOLA IIM stem followed by 1x1 feature fusion."""
+    """Full-width RGB/luminance stem with a gated YOLA IIM residual branch."""
 
     def __init__(self, c1, c2, k=3, s=2, kernel_nums=8, kernel_size=3):
-        """Initialize an RGB stem and a parallel illumination-invariant stem.
+        """Initialize the appearance stem and its illumination-invariant residual.
 
         Args:
             c1 (int): Number of input channels; must be 3 for RGB.
-            c2 (int): Number of fused output channels.
+            c2 (int): Number of output channels in both the main and residual branches.
             k (int): Kernel size of each downsampling stem.
             s (int): Stride of each downsampling stem.
             kernel_nums (int): Number of learnable IIM kernels per color pair.
@@ -176,16 +176,22 @@ class IIMStem(nn.Module):
         super().__init__()
         if c1 != 3:
             raise ValueError(f"IIMStem requires RGB input with 3 channels, but received {c1}.")
-        rgb_channels = c2 // 2
-        iim_channels = c2 - rgb_channels
-        self.rgb_stem = Conv(c1, rgb_channels, k, s)
+        # Keep the complete RGB (including achromatic luminance) representation as the main path. The IIM branch is
+        # intentionally additive rather than concatenated/fused, so color-ratio invariance cannot replace or compress
+        # the brightness gradients that reveal shallow dents.
+        self.rgb_stem = Conv(c1, c2, k, s)
         self.iim = IlluminationInvariantConv(kernel_nums, kernel_size)
-        self.iim_stem = Conv(3 * kernel_nums, iim_channels, k, s)
-        self.fuse = Conv(c2, c2, 1, 1)
+        self.iim_stem = Conv(3 * kernel_nums, c2, k, s)
+        self.iim_gain = nn.Parameter(torch.zeros(()))
 
     def forward(self, x):
-        """Fuse raw RGB and illumination-invariant stem features."""
-        return self.fuse(torch.cat((self.rgb_stem(x), self.iim_stem(self.iim(x))), dim=1))
+        """Return the full appearance feature plus a bounded, learnable IIM residual."""
+        appearance = self.rgb_stem(x)
+        invariant_residual = self.iim_stem(self.iim(x))
+        # Checkpoints produced by the earlier concatenation-based IIMStem retain their original inference path.
+        if hasattr(self, "fuse"):
+            return self.fuse(torch.cat((appearance, invariant_residual), dim=1))
+        return appearance + self.iim_gain.tanh() * invariant_residual
 
 
 class Conv2(Conv):

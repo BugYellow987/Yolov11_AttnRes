@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from copy import deepcopy
 from itertools import repeat
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
@@ -204,7 +205,151 @@ class YOLODataset(BaseDataset):
                 lb["segments"] = []
         if len_cls == 0:
             LOGGER.warning(f"Labels are missing or empty in {cache_path}, training may not work correctly. {HELP_URL}")
+        return self._oversample_hard_positives(labels)
+
+    def _oversample_hard_positives(self, labels: list[dict]) -> list[dict]:
+        """Repeat explicitly reviewed hard-positive images during training.
+
+        The optional dataset YAML configuration is::
+
+            hard_positive:
+              class: Dent
+              images: dent-hard-positives.txt  # optional; omit to repeat every Dent-positive image
+              repeat: 3                        # total occurrences, including the original
+              require_class: true              # fail if a listed image has no Dent annotation
+
+        This is deliberately label-driven. It never converts an unlabeled shadow into a pseudo Dent, because doing so
+        would silently train on an invented mask rather than a fully reviewed Dent outline.
+        """
+        config = self.data.get("hard_positive")
+        if not self.augment or not config:
+            return labels
+        if not isinstance(config, dict):
+            raise TypeError("'hard_positive' in the dataset YAML must be a mapping.")
+
+        repeat_count = config.get("repeat", 1)
+        if isinstance(repeat_count, bool) or int(repeat_count) != repeat_count or repeat_count < 1:
+            raise ValueError("hard_positive.repeat must be a positive integer.")
+        repeat_count = int(repeat_count)
+        if repeat_count == 1:
+            return labels
+
+        class_id, class_name = self._resolve_hard_positive_class(config.get("class", "Dent"))
+        identifiers = self._load_hard_positive_identifiers(config.get("images"))
+        require_class = bool(config.get("require_class", True))
+        selected, matched_identifiers, incomplete = [], set(), []
+
+        for label in labels:
+            matched = self._match_hard_positive_identifier(label["im_file"], identifiers)
+            if identifiers is not None and matched is None:
+                continue
+            if matched is not None:
+                matched_identifiers.add(matched)
+
+            classes = np.asarray(label["cls"]).reshape(-1).astype(int, copy=False)
+            class_indices = np.flatnonzero(classes == class_id)
+            has_class = class_indices.size > 0
+            has_masks = not self.use_segments or (
+                bool(label.get("segments")) and class_indices.max(initial=-1) < len(label["segments"])
+            )
+            if not has_class or not has_masks:
+                if identifiers is not None:
+                    incomplete.append(label["im_file"])
+                continue
+            selected.append(label)
+
+        if identifiers is not None:
+            missing = identifiers - matched_identifiers
+            if missing:
+                examples = ", ".join(sorted(missing)[:5])
+                raise FileNotFoundError(
+                    f"{self.prefix}hard-positive entries were not found in the training split: {examples}"
+                )
+            if incomplete and require_class:
+                examples = ", ".join(str(Path(x).name) for x in incomplete[:5])
+                raise ValueError(
+                    f"{self.prefix}{len(incomplete)} listed hard-positive image(s) have no complete {class_name} "
+                    f"annotation ({examples}). Fully outline each shadow-like cavity as {class_name} before training."
+                )
+
+        if not selected:
+            LOGGER.warning(
+                f"{self.prefix}No labeled {class_name} hard positives were selected; oversampling was skipped."
+            )
+            return labels
+
+        original_count = len(labels)
+        labels = labels + [deepcopy(label) for _ in range(repeat_count - 1) for label in selected]
+        self.im_files = [label["im_file"] for label in labels]
+        self.label_files = img2label_paths(self.im_files)
+        LOGGER.info(
+            f"{self.prefix}Hard-positive oversampling: repeated {len(selected)} {class_name} image(s) "
+            f"{repeat_count}x ({original_count} -> {len(labels)} training samples)."
+        )
         return labels
+
+    def _resolve_hard_positive_class(self, class_spec: int | str) -> tuple[int, str]:
+        """Resolve a hard-positive class index or case-insensitive class name."""
+        names = self.data["names"]
+        names = dict(enumerate(names)) if isinstance(names, list) else {int(k): str(v) for k, v in names.items()}
+        if isinstance(class_spec, str) and not class_spec.strip().isdigit():
+            matches = [
+                (index, name) for index, name in names.items() if name.casefold() == class_spec.strip().casefold()
+            ]
+            if not matches:
+                available = ", ".join(names.values())
+                raise ValueError(f"Hard-positive class '{class_spec}' is not in dataset names: {available}")
+            return matches[0]
+
+        class_id = int(class_spec)
+        if class_id not in names:
+            raise ValueError(f"Hard-positive class index {class_id} is outside dataset names.")
+        return class_id, names[class_id]
+
+    def _load_hard_positive_identifiers(self, source: str | Path | list[str] | None) -> set[str] | None:
+        """Load image paths, names, or stems used to identify reviewed hard positives."""
+        if source is None:
+            return None
+        entries: list[str]
+        if isinstance(source, (str, Path)):
+            source_path = Path(source)
+            if source_path.suffix.lower() == ".txt":
+                if not source_path.is_absolute():
+                    source_path = Path(self.data["path"]) / source_path
+                if not source_path.is_file():
+                    raise FileNotFoundError(f"{self.prefix}Hard-positive list not found: {source_path}")
+                entries = source_path.read_text(encoding="utf-8").splitlines()
+            else:
+                entries = [str(source)]
+        elif isinstance(source, list):
+            entries = [str(entry) for entry in source]
+        else:
+            raise TypeError("hard_positive.images must be a text-file path or a list of image paths/names/stems.")
+
+        identifiers = {
+            entry.strip().replace("\\", "/").removeprefix("./").casefold()
+            for entry in entries
+            if entry.strip() and not entry.lstrip().startswith("#")
+        }
+        if not identifiers:
+            raise ValueError("hard_positive.images did not contain any image identifiers.")
+        return identifiers
+
+    @staticmethod
+    def _match_hard_positive_identifier(image_file: str, identifiers: set[str] | None) -> str | None:
+        """Return the matching path, filename, or stem identifier for an image."""
+        if identifiers is None:
+            return None
+        path = str(Path(image_file).resolve()).replace("\\", "/").casefold()
+        name, stem = Path(image_file).name.casefold(), Path(image_file).stem.casefold()
+        return next(
+            (
+                identifier
+                for identifier in identifiers
+                if identifier in {path, name, stem} or path.endswith(f"/{identifier}")
+            ),
+            None,
+        )
 
     def build_transforms(self, hyp: dict | None = None) -> Compose:
         """Build and append transforms to the list.
