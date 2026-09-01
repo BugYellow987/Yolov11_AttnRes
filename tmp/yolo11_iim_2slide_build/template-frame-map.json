@@ -1,0 +1,58 @@
+{
+  "outputSlides": [
+    {
+      "outputSlide": 1,
+      "sourceSlide": 16,
+      "narrativeRole": "technical architecture change and equation explanation",
+      "reuseMode": "duplicate-slide",
+      "editTargets": [
+        { "sourceElementId": "sh/8z2h8bq1", "action": "rewrite", "purpose": "sixth-version takeaway title" },
+        { "sourceElementId": "sh/ytkf2h8j", "action": "rewrite", "purpose": "unchanged downstream architecture label" },
+        { "sourceElementId": "sh/zutgvm94", "action": "rewrite", "purpose": "IIM stem label" },
+        { "sourceElementId": "sh/lwbyxwra", "action": "rewrite", "purpose": "IIM core equations" },
+        { "sourceElementId": "sh/ip4zel83", "action": "rewrite", "purpose": "equation-to-project effects" }
+      ]
+    },
+    {
+      "outputSlide": 2,
+      "sourceSlide": 23,
+      "narrativeRole": "shadow-recognition causal explanation, effects, risks, and validation",
+      "reuseMode": "duplicate-slide",
+      "editTargets": [
+        { "sourceElementId": "sh/69gry94v", "action": "rewrite", "purpose": "section eyebrow" },
+        { "sourceElementId": "sh/90vqdczq", "action": "rewrite", "purpose": "mechanism takeaway title" },
+        { "sourceElementId": "sh/v2d8fmhw", "action": "rewrite", "purpose": "shadow formation heading" },
+        { "sourceElementId": "sh/xovqhcz2", "action": "rewrite", "purpose": "shadow image-formation equations and effects" },
+        { "sourceElementId": "sh/w3m9o7yh", "action": "rewrite", "purpose": "IIM cancellation heading" },
+        { "sourceElementId": "sh/ip4rqhgn", "action": "rewrite", "purpose": "IIM equations, downstream process, and limitations" },
+        { "sourceElementId": "sh/sby90zm1", "action": "rewrite", "purpose": "net project impact" },
+        { "sourceElementId": "sh/tc7at436", "action": "rewrite", "purpose": "output page marker" }
+      ]
+    }
+  ],
+  "omittedSourceSlides": [
+    { "sourceSlide": 1, "reason": "agenda pattern not needed in the requested two-slide technical explanation" },
+    { "sourceSlide": 2, "reason": "section bumper not needed" },
+    { "sourceSlide": 3, "reason": "earlier AttentionResiduals explanation is background, not the sixth-version change" },
+    { "sourceSlide": 4, "reason": "earlier depth-attention detail is out of scope" },
+    { "sourceSlide": 5, "reason": "earlier ablation slide is superseded by the IIM-specific validation content" },
+    { "sourceSlide": 6, "reason": "image-only evidence slide is not required" },
+    { "sourceSlide": 7, "reason": "FSNet background is retained only as downstream context" },
+    { "sourceSlide": 8, "reason": "cross-scale YAML detail is unchanged" },
+    { "sourceSlide": 9, "reason": "image-only evidence slide is not required" },
+    { "sourceSlide": 10, "reason": "third-version architecture history is not needed" },
+    { "sourceSlide": 11, "reason": "third-version cost slide is not needed" },
+    { "sourceSlide": 12, "reason": "image-only evidence slide is not required" },
+    { "sourceSlide": 13, "reason": "fourth-version architecture history is summarized by the preserved diagram on slide 16" },
+    { "sourceSlide": 14, "reason": "fourth-version validation detail is replaced by IIM-specific metrics" },
+    { "sourceSlide": 15, "reason": "image-only evidence slide is not required" },
+    { "sourceSlide": 17, "reason": "overlap-specific landing conditions are not the requested shadow focus" },
+    { "sourceSlide": 18, "reason": "image comparison does not isolate the IIM change" },
+    { "sourceSlide": 19, "reason": "general three-problem opener is unnecessary for a two-slide IIM deck" },
+    { "sourceSlide": 20, "reason": "general project background is compressed into slide 1" },
+    { "sourceSlide": 21, "reason": "small-object problem slide is out of scope except as a downstream impact" },
+    { "sourceSlide": 22, "reason": "overlap problem slide is out of scope except as a downstream impact" },
+    { "sourceSlide": 24, "reason": "general landing roadmap is replaced by IIM-specific controlled ablation guidance" },
+    { "sourceSlide": 25, "reason": "general conclusion is replaced by the shadow-recognition conclusion" }
+  ]
+}

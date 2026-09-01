@@ -1,0 +1,10 @@
+Primary project sources:
+- C:\Users\USER\Documents\old_version_iim\Yolov11_AttnRes\ultralytics\cfg\models\11_myself\yolo11-6csar-iim.yaml
+- C:\Users\USER\Documents\old_version_iim\Yolov11_AttnRes\ultralytics\cfg\models\11_myself\yolo11-6csar.yaml
+- C:\Users\USER\Documents\old_version_iim\Yolov11_AttnRes\ultralytics\nn\modules\conv.py (IlluminationInvariantConv and IIMStem)
+- C:\Users\USER\Documents\old_version_iim\Yolov11_AttnRes\tests\test_yolo11_6csar_iim.py
+
+Visual source:
+- C:\Users\USER\Desktop\YOLO11_.pptx, especially source slide 16 for the architecture/equation layout and source slide 23 for the illumination cause/solution layout.
+
+No web claims or external visual assets are used. The mathematical explanation is derived directly from the implementation and its regression tests.

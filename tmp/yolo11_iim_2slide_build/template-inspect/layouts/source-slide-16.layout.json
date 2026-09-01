@@ -1,0 +1,576 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/gny5sjyp",
+    "id": "gny5sjyp",
+    "slide": 16,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light",
+        "eastAsianTypeface": "Calibri Light",
+        "complexScriptTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "Calibri",
+        "complexScriptTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "Cascadia Mono",
+      "Microsoft JhengHei"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8z2h8bq1",
+      "id": "2",
+      "name": "slide-5-title",
+      "bbox": [
+        41.33,
+        34,
+        1197.33,
+        74
+      ],
+      "geometry": "rect",
+      "text": "第五版：重疊損傷 Multi-label 監督",
+      "textPreview": "第五版：重疊損傷 Multi-label 監督",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "第五版：重疊損傷 Multi-label 監督"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "第五版：重疊損傷 Multi-label 監督",
+          "resolvedTextStyle": {
+            "fontSize": 46,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "第五版：重疊損傷 Multi-label 監督",
+              "fontSize": 46,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e1sf65o3",
+      "id": "11",
+      "name": "rule-640-146",
+      "bbox": [
+        640,
+        146,
+        0.01,
+        0.01
+      ],
+      "geometry": "straightConnector1",
+      "lineColor": "#B8BCC4",
+      "lineWidth": 1
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ytkf2h8j",
+      "id": "4",
+      "name": "text-uo6fd4u",
+      "bbox": [
+        41.33,
+        150,
+        560,
+        45
+      ],
+      "geometry": "rect",
+      "text": "yolo11-0621-2 架構",
+      "textPreview": "yolo11-0621-2 架構",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "yolo11-0621-2 架構"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "yolo11-0621-2 架構",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "yolo11-0621-2 架構",
+              "fontSize": 30,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zutgvm94",
+      "id": "5",
+      "name": "text-u2p5w1f",
+      "bbox": [
+        680,
+        150,
+        558,
+        45
+      ],
+      "geometry": "rect",
+      "text": "同一像素允許多種損傷",
+      "textPreview": "同一像素允許多種損傷",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "同一像素允許多種損傷"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "同一像素允許多種損傷",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Microsoft JhengHei",
+            "color": "#3D8DFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "同一像素允許多種損傷",
+              "fontSize": 28,
+              "typeface": "Microsoft JhengHei",
+              "color": "#3D8DFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kv2h4rqp",
+      "id": "6",
+      "name": "panel-95y9xwz",
+      "bbox": [
+        680,
+        214,
+        558,
+        178
+      ],
+      "geometry": "rect",
+      "fillColor": "#D0EDFA",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lwbyxwra",
+      "id": "7",
+      "name": "text-7cz24ne",
+      "bbox": [
+        708,
+        247,
+        500,
+        120
+      ],
+      "geometry": "rect",
+      "text": "T_c(h,w) = max_{j:y_j=c} M_j(h,w)\np_c(h,w) = σ(z_c),  not softmax_c\nL_ov = 0.5 BCE_w + 0.5 Dice",
+      "textPreview": "T_c(h,w) = max_{j:y_j=c} M_j(h,w) | p_c(h,w) = σ(z_c),  not softmax_c | L_ov = 0.5 BCE_w + 0.5 Dice",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "T_c(h,w) = max_{j:y_j=c} M_j(h,w)"
+          },
+          {
+            "index": 2,
+            "text": "p_c(h,w) = σ(z_c),  not softmax_c"
+          },
+          {
+            "index": 3,
+            "text": "L_ov = 0.5 BCE_w + 0.5 Dice"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "T_c(h,w) = max_{j:y_j=c} M_j(h,w)",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Cascadia Mono",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "T_c(h,w) = max_{j:y_j=c} M_j(h,w)",
+              "fontSize": 20,
+              "typeface": "Cascadia Mono",
+              "color": "#000000"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "p_c(h,w) = σ(z_c),  not softmax_c",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Cascadia Mono",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "p_c(h,w) = σ(z_c),  not softmax_c",
+              "fontSize": 20,
+              "typeface": "Cascadia Mono",
+              "color": "#000000"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "L_ov = 0.5 BCE_w + 0.5 Dice",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Cascadia Mono",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "L_ov = 0.5 BCE_w + 0.5 Dice",
+              "fontSize": 20,
+              "typeface": "Cascadia Mono",
+              "color": "#000000"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ip4zel83",
+      "id": "8",
+      "name": "text-bk13iu1",
+      "bbox": [
+        680,
+        434,
+        558,
+        164
+      ],
+      "geometry": "rect",
+      "text": "01  AR＋Shuffle：保留紋理與深層語意\n02  2×CSAR：重疊區重新選擇尺度\n03  Segment：prototype 分離每個 instance",
+      "textPreview": "01  AR＋Shuffle：保留紋理與深層語意 | 02  2×CSAR：重疊區重新選擇尺度 | 03  Segment：prototype 分離每個 instance",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "01  AR＋Shuffle：保留紋理與深層語意"
+          },
+          {
+            "index": 2,
+            "text": "02  2×CSAR：重疊區重新選擇尺度"
+          },
+          {
+            "index": 3,
+            "text": "03  Segment：prototype 分離每個 instance"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "01  AR＋Shuffle：保留紋理與深層語意",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "01  AR＋Shuffle：保留紋理與深層語意",
+              "fontSize": 21,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "02  2×CSAR：重疊區重新選擇尺度",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "02  2×CSAR：重疊區重新選擇尺度",
+              "fontSize": 21,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "03  Segment：prototype 分離每個 instance",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "03  Segment：prototype 分離每個 instance",
+              "fontSize": 21,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/6l0b25sv",
+      "id": "12",
+      "name": "圖片 11",
+      "bbox": [
+        41.33,
+        247.77,
+        557,
+        316.47
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image5.png",
+        "contentType": "image/png",
+        "byteLength": 72607
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image5.png",
+        "contentType": "image/png",
+        "byteLength": 72607
+      }
+    }
+  ],
+  "composeRuns": []
+}

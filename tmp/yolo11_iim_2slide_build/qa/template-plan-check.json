@@ -1,0 +1,10 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-09-01T02:24:43.986Z",
+  "workspace": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build",
+  "mapPath": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-frame-map.json",
+  "inspectPath": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-inspect\\template-inspect.ndjson",
+  "sourceSlideCount": 25,
+  "issueCount": 0,
+  "issues": []
+}

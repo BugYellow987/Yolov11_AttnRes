@@ -1,0 +1,11 @@
+Output slide 1 / source slide 16:
+- Rewrites the title and both section labels to identify the sixth-version IIM front-end.
+- Preserves the source architecture image because the downstream AttentionResiduals, FSNetShuffle, two-stage CSAR, and Segment26 graph remains unchanged; the revised left label explicitly frames the image as the unchanged downstream path.
+- Rewrites the inherited blue formula panel and the inherited three-line implication frame. No new primitives are added.
+
+Output slide 2 / source slide 23:
+- Rewrites the light-problem copy into a formula-led shadow-recognition explanation while preserving the original cause/solution composition.
+- Rewrites the takeaway and page marker. No geometry, panel, rule, or typography changes are intended.
+
+Speaker notes:
+- Adds detailed mathematical derivations and local source paths to both slides; notes do not change the visible template structure.

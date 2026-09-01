@@ -1,0 +1,34 @@
+{
+  "sourcePptx": "C:\\Users\\USER\\Desktop\\YOLO11_.pptx",
+  "mapPath": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-frame-map.json",
+  "output": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter.pptx",
+  "outputBytes": 92961,
+  "sourceSlideCount": 25,
+  "slideCount": 2,
+  "previewDir": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter-preview",
+  "layoutDir": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter-layout",
+  "slides": [
+    {
+      "outputSlide": 1,
+      "sourceSlide": 16,
+      "narrativeRole": "technical architecture change and equation explanation",
+      "reuseMode": "duplicate-slide",
+      "editTargetCount": 5,
+      "previewPath": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter-preview\\starter-slide-01.png",
+      "previewRelativePath": "template-starter-preview/starter-slide-01.png",
+      "layoutPath": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter-layout\\starter-slide-01.layout.json",
+      "layoutRelativePath": "template-starter-layout/starter-slide-01.layout.json"
+    },
+    {
+      "outputSlide": 2,
+      "sourceSlide": 23,
+      "narrativeRole": "shadow-recognition causal explanation, effects, risks, and validation",
+      "reuseMode": "duplicate-slide",
+      "editTargetCount": 8,
+      "previewPath": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter-preview\\starter-slide-02.png",
+      "previewRelativePath": "template-starter-preview/starter-slide-02.png",
+      "layoutPath": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter-layout\\starter-slide-02.layout.json",
+      "layoutRelativePath": "template-starter-layout/starter-slide-02.layout.json"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-09-01T02:30:22.113Z",
+  "workspace": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build",
+  "finalPptx": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\yolo11-6csar-iim_陰影辨識_2頁.pptx",
+  "starterPptx": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter.pptx",
+  "mapPath": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-frame-map.json",
+  "starterLayoutDir": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\template-starter-layout",
+  "finalLayoutDir": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build\\final-layout\\final",
+  "editDir": "C:\\Users\\USER\\Documents\\old_version_iim\\Yolov11_AttnRes\\tmp\\yolo11_iim_2slide_build",
+  "issueCount": 0,
+  "issues": []
+}

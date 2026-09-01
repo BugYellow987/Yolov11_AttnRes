@@ -1,0 +1,593 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/y90nupkv",
+    "id": "y90nupkv",
+    "slide": 1,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light",
+        "eastAsianTypeface": "Calibri Light",
+        "complexScriptTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "Calibri",
+        "complexScriptTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "Cascadia Mono",
+      "Microsoft JhengHei"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/547294r6",
+      "id": "2",
+      "name": "slide-5-title",
+      "bbox": [
+        41.33,
+        34,
+        1197.33,
+        74
+      ],
+      "geometry": "rect",
+      "text": "第六版：IIM 處理陰影，6-CSAR 主體不變",
+      "textPreview": "第六版：IIM 處理陰影，6-CSAR 主體不變",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 46,
+        "typeface": "Microsoft JhengHei",
+        "color": "#000000",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "第六版：IIM 處理陰影，6-CSAR 主體不變"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "第六版：IIM 處理陰影，6-CSAR 主體不變",
+          "resolvedTextStyle": {
+            "fontSize": 46,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "第六版：IIM 處理陰影，6-CSAR 主體不變",
+              "fontSize": 46,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4r6dg7et",
+      "id": "14",
+      "name": "rule-640-146",
+      "bbox": [
+        640,
+        146,
+        0.01,
+        0.01
+      ],
+      "geometry": "straightConnector1",
+      "lineColor": "#B8BCC4",
+      "lineWidth": 1
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7qp4be9c",
+      "id": "4",
+      "name": "text-uo6fd4u",
+      "bbox": [
+        41.33,
+        150,
+        560,
+        45
+      ],
+      "geometry": "rect",
+      "text": "原 6-CSAR：下游架構與層號不變",
+      "textPreview": "原 6-CSAR：下游架構與層號不變",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Microsoft JhengHei",
+        "color": "#000000",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "原 6-CSAR：下游架構與層號不變"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "原 6-CSAR：下游架構與層號不變",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "原 6-CSAR：下游架構與層號不變",
+              "fontSize": 30,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/65g3298r",
+      "id": "5",
+      "name": "text-u2p5w1f",
+      "bbox": [
+        680,
+        150,
+        558,
+        45
+      ],
+      "geometry": "rect",
+      "text": "新 IIMStem：雙分支抑制陰影偏移",
+      "textPreview": "新 IIMStem：雙分支抑制陰影偏移",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Microsoft JhengHei",
+        "color": "#3D8DFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "新 IIMStem：雙分支抑制陰影偏移"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "新 IIMStem：雙分支抑制陰影偏移",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Microsoft JhengHei",
+            "color": "#3D8DFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "新 IIMStem：雙分支抑制陰影偏移",
+              "fontSize": 28,
+              "typeface": "Microsoft JhengHei",
+              "color": "#3D8DFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ts7md4r2",
+      "id": "6",
+      "name": "panel-95y9xwz",
+      "bbox": [
+        680,
+        214,
+        558,
+        178
+      ],
+      "geometry": "rect",
+      "fillColor": "#D0EDFA",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sryl4zqx",
+      "id": "7",
+      "name": "text-7cz24ne",
+      "bbox": [
+        708,
+        247,
+        500,
+        120
+      ],
+      "geometry": "rect",
+      "text": "x_c=ln(max(I_c,ε));  K′_m=K_m−μ(K_m)\nD_m^ab=K′_m*(x_a−x_b),  ab=RG/GB/RB\nF₀=Conv₁×₁([F_RGB ‖ F_IIM])",
+      "textPreview": "x_c=ln(max(I_c,ε));  K′_m=K_m−μ(K_m) | D_m^ab=K′_m*(x_a−x_b),  ab=RG/GB/RB | F₀=Conv₁×₁([F_RGB ‖ F_IIM])",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 20,
+        "typeface": "Cascadia Mono",
+        "color": "#000000",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "x_c=ln(max(I_c,ε));  K′_m=K_m−μ(K_m)"
+          },
+          {
+            "index": 2,
+            "text": "D_m^ab=K′_m*(x_a−x_b),  ab=RG/GB/RB"
+          },
+          {
+            "index": 3,
+            "text": "F₀=Conv₁×₁([F_RGB ‖ F_IIM])"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "x_c=ln(max(I_c,ε));  K′_m=K_m−μ(K_m)",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Cascadia Mono",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "x_c=ln(max(I_c,ε));  K′_m=K_m−μ(K_m)",
+              "fontSize": 20,
+              "typeface": "Cascadia Mono",
+              "color": "#000000",
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "D_m^ab=K′_m*(x_a−x_b),  ab=RG/GB/RB",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Cascadia Mono",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "D_m^ab=K′_m*(x_a−x_b),  ab=RG/GB/RB",
+              "fontSize": 20,
+              "typeface": "Cascadia Mono",
+              "color": "#000000",
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "F₀=Conv₁×₁([F_RGB ‖ F_IIM])",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Cascadia Mono",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "F₀=Conv₁×₁([F_RGB ‖ F_IIM])",
+              "fontSize": 20,
+              "typeface": "Cascadia Mono",
+              "color": "#000000",
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fu94fe98",
+      "id": "8",
+      "name": "text-bk13iu1",
+      "bbox": [
+        680,
+        434,
+        558,
+        164
+      ],
+      "geometry": "rect",
+      "text": "01  8 個共享 3×3 核 × 3 色差 → 24 張 IIM maps\n02  RGB、IIM 各輸出 c₂/2；Concat→1×1 回到 c₂\n03  stride=2 維持 P1/2；層號 0–21 與 head 索引不變",
+      "textPreview": "01  8 個共享 3×3 核 × 3 色差 → 24 張 IIM maps | 02  RGB、IIM 各輸出 c₂/2；Concat→1×1 回到 c₂ | 03  stride=2 維持 P1/2；層號 0–21 與 head 索引不變",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 21,
+        "typeface": "Microsoft JhengHei",
+        "color": "#000000",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "01  8 個共享 3×3 核 × 3 色差 → 24 張 IIM maps"
+          },
+          {
+            "index": 2,
+            "text": "02  RGB、IIM 各輸出 c₂/2；Concat→1×1 回到 c₂"
+          },
+          {
+            "index": 3,
+            "text": "03  stride=2 維持 P1/2；層號 0–21 與 head 索引不變"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "01  8 個共享 3×3 核 × 3 色差 → 24 張 IIM maps",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "01  8 個共享 3×3 核 × 3 色差 → 24 張 IIM maps",
+              "fontSize": 21,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000",
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "02  RGB、IIM 各輸出 c₂/2；Concat→1×1 回到 c₂",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "02  RGB、IIM 各輸出 c₂/2；Concat→1×1 回到 c₂",
+              "fontSize": 21,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000",
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "03  stride=2 維持 P1/2；層號 0–21 與 head 索引不變",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "typeface": "Microsoft JhengHei",
+            "color": "#000000",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "03  stride=2 維持 P1/2；層號 0–21 與 head 索引不變",
+              "fontSize": 21,
+              "typeface": "Microsoft JhengHei",
+              "color": "#000000",
+              "alignment": "left"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/alovadw3",
+      "id": "15",
+      "name": "圖片 11",
+      "bbox": [
+        41.33,
+        247.77,
+        557,
+        316.47
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image.png",
+        "contentType": "image/png",
+        "byteLength": 72607
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image.png",
+        "contentType": "image/png",
+        "byteLength": 72607
+      }
+    }
+  ],
+  "composeRuns": []
+}

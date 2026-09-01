@@ -1,0 +1,15 @@
+Source deck: C:\Users\USER\Desktop\YOLO11_.pptx
+Canvas: 1280 x 720 px, 16:9.
+Structure: 25 slides, two masters and two title layouts; inherited layout/master element layers are empty, while all visible objects are slide-local.
+Typography: technical slides use Microsoft JhengHei for Chinese titles/body, Cascadia Mono for equations, and a black/white system with #3D8DFF blue and #D0EDFA formula panels. Problem-analysis slides use Arial with red problem headings, green solution headings, light gray/green panels, and a blue centered takeaway.
+Reusable patterns selected:
+- Source slide 16: one-line 46 pt title, two-column architecture/equation pattern, 30/28 pt section headings, 20 pt monospaced equation panel, 21 pt consequence list.
+- Source slide 23: 14 pt eyebrow, 38 pt takeaway title, two 535 x 354 panels with 24 pt section headings and 21 pt explanatory copy, 22 pt centered conclusion.
+Insertion contract: duplicate source slides 16 and 23; rewrite only the mapped inherited text elements. Preserve the architecture image, panels, rules, typography, spacing, masters, layouts, and all other inherited objects.
+Placeholder audit: source layouts and masters contain no inherited elements; the mapped slides contain no structural PowerPoint placeholders. Page marker on output slide 2 is intentionally rewritten to 02.
+
+Communication job: By the end, a technical YOLO11 project audience should understand exactly how the sixth-version IIM stem suppresses shadow-induced illumination variation, how each equation changes learned visual features, and which accuracy/cost risks require controlled ablation.
+
+Narrative:
+1. Locate the change: IIMStem replaces only backbone layer 0 while retaining the original AR/FSNetShuffle/2xCSAR/Segment26 graph and indices.
+2. Explain the mechanism: the image-formation model creates the shadow problem; log channel differences cancel shared illumination, zero-mean kernels emphasize local chromatic edges, and RGB/IIM fusion balances robustness with retained brightness cues.
