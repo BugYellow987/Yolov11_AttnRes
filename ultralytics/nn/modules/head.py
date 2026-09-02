@@ -38,6 +38,7 @@ __all__ = (
     "Pose",
     "RTDETRDecoder",
     "Segment",
+    "Segment26ClassQuery",
     "Segment26MultiLabel",
     "SemanticSegment",
     "YOLOEDetect",
@@ -488,6 +489,53 @@ class Segment26MultiLabel(Segment26):
         if self.training:
             return preds
         return (outputs, proto) if self.export else ((outputs[0], proto), preds)
+
+
+class Segment26ClassQuery(Segment26MultiLabel):
+    """Condition Segment26 features on the class-query evidence produced by MSATMultiLabel.
+
+    The auxiliary logits remain explicitly supervised as independent multi-label maps, while lightweight per-level
+    adapters also feed that evidence into the main box, class, mask-coefficient, and prototype paths. This makes class
+    queries part of the inference architecture instead of a training-only auxiliary branch.
+    """
+
+    def __init__(
+        self,
+        nc: int = 80,
+        nm: int = 32,
+        npr: int = 256,
+        multilabel_gain: float = 0.5,
+        cooccurrence_weight: float = 2.0,
+        condition_scale: float = 0.1,
+        reg_max=16,
+        end2end=False,
+        ch: tuple = (),
+    ):
+        """Initialize class-query adapters for every segmentation feature level."""
+        super().__init__(nc, nm, npr, multilabel_gain, cooccurrence_weight, reg_max, end2end, ch)
+        feature_channels = ch[: self.num_feature_levels]
+        self.class_adapters = nn.ModuleList(nn.Conv2d(nc, channels, 1) for channels in feature_channels)
+        self.condition_scale = nn.Parameter(torch.full((self.num_feature_levels,), float(condition_scale)))
+        for adapter in self.class_adapters:
+            nn.init.normal_(adapter.weight, std=1e-3)
+            nn.init.zeros_(adapter.bias)
+        self.class_query_conditioned = True
+
+    def forward(self, x: list[torch.Tensor]) -> tuple | list[torch.Tensor] | dict[str, torch.Tensor]:
+        """Modulate every feature level with class-query logits before Segment26 prediction."""
+        if len(x) != 2 * self.num_feature_levels:
+            raise ValueError(
+                f"Segment26ClassQuery expected {2 * self.num_feature_levels} inputs, but received {len(x)}."
+            )
+        features = x[: self.num_feature_levels]
+        auxiliary_logits = x[self.num_feature_levels :]
+        conditioned = []
+        for index, (feature, logits, adapter) in enumerate(zip(features, auxiliary_logits, self.class_adapters)):
+            if logits.shape[-2:] != feature.shape[-2:]:
+                logits = F.interpolate(logits, size=feature.shape[-2:], mode="bilinear", align_corners=False)
+            modulation = torch.tanh(adapter(logits))
+            conditioned.append(feature * (1.0 + torch.tanh(self.condition_scale[index]) * modulation))
+        return super().forward([*conditioned, *auxiliary_logits])
 
 
 class OBB(Detect):

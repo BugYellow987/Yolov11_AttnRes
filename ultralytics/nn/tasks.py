@@ -12,6 +12,7 @@ import torch.nn as nn
 
 from ultralytics.nn.autobackend import check_class_names
 from ultralytics.nn.modules import (
+    AdaptiveGatedFusion,
     AIFI,
     C1,
     C2,
@@ -55,6 +56,7 @@ from ultralytics.nn.modules import (
     Detect,
     DWConv,
     DWConvTranspose2d,
+    DualIIMStem,
     FSAttentionResiduals,
     FSNetShuffle,
     Focus,
@@ -77,6 +79,7 @@ from ultralytics.nn.modules import (
     SCDown,
     Segment,
     Segment26,
+    Segment26ClassQuery,
     Segment26MultiLabel,
     SCA,
     SemanticSegment,
@@ -1697,6 +1700,7 @@ def parse_model(d, ch, verbose=True):
             Conv,
             ConvTranspose,
             GhostConv,
+            DualIIMStem,
             IIMStem,
             Bottleneck,
             GhostBottleneck,
@@ -1804,7 +1808,17 @@ def parse_model(d, ch, verbose=True):
             args = [ch[f]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
-        elif m in {CSAR, MultiStateCSAR, MSAT, MSATMultiLabel, CrossScaleAttention, PatchCSAR, SCA, FSNetShuffle}:
+        elif m in {
+            AdaptiveGatedFusion,
+            CSAR,
+            MultiStateCSAR,
+            MSAT,
+            MSATMultiLabel,
+            CrossScaleAttention,
+            PatchCSAR,
+            SCA,
+            FSNetShuffle,
+        }:
             c2 = args[0]
             if c2 != nc:
                 c2 = make_divisible(min(c2, max_channels) * width, 8)
@@ -1817,6 +1831,7 @@ def parse_model(d, ch, verbose=True):
                 YOLOEDetect,
                 Segment,
                 Segment26,
+                Segment26ClassQuery,
                 Segment26MultiLabel,
                 YOLOESegment,
                 YOLOESegment26,
@@ -1827,13 +1842,14 @@ def parse_model(d, ch, verbose=True):
             }
         ):
             args.extend([reg_max, end2end, [ch[x] for x in f]])
-            if m in {Segment, YOLOESegment, Segment26, Segment26MultiLabel, YOLOESegment26}:
+            if m in {Segment, YOLOESegment, Segment26, Segment26ClassQuery, Segment26MultiLabel, YOLOESegment26}:
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
             if m in {
                 Detect,
                 YOLOEDetect,
                 Segment,
                 Segment26,
+                Segment26ClassQuery,
                 Segment26MultiLabel,
                 YOLOESegment,
                 YOLOESegment26,

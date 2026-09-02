@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 
 __all__ = (
+    "AdaptiveGatedFusion",
     "CBAM",
     "ChannelAttention",
     "Concat",
@@ -18,6 +19,7 @@ __all__ = (
     "ConvTranspose",
     "DWConv",
     "DWConvTranspose2d",
+    "DualIIMStem",
     "Focus",
     "GhostConv",
     "IIMStem",
@@ -186,6 +188,114 @@ class IIMStem(nn.Module):
     def forward(self, x):
         """Fuse raw RGB and illumination-invariant stem features."""
         return self.fuse(torch.cat((self.rgb_stem(x), self.iim_stem(self.iim(x))), dim=1))
+
+
+class DualIIMStem(nn.Module):
+    """Keep full-width RGB appearance and illumination-invariant structure features as separate streams."""
+
+    def __init__(self, c1, c2, k=3, s=2, kernel_nums=8, kernel_size=3):
+        """Initialize independent RGB and YOLA IIM stems.
+
+        Unlike :class:`IIMStem`, this module deliberately does not fuse its outputs. The two tensors are returned as
+        explicit graph states so a model can preserve color evidence and illumination-robust structure until a later
+        feature level.
+
+        Args:
+            c1 (int): Number of input channels; must be 3 for RGB.
+            c2 (int): Output channels in each branch.
+            k (int): Kernel size of each downsampling stem.
+            s (int): Stride of each downsampling stem.
+            kernel_nums (int): Number of learnable IIM kernels per color pair.
+            kernel_size (int): Spatial size of each IIM kernel.
+        """
+        super().__init__()
+        if c1 != 3:
+            raise ValueError(f"DualIIMStem requires RGB input with 3 channels, but received {c1}.")
+        self.rgb_stem = Conv(c1, c2, k, s)
+        self.iim = IlluminationInvariantConv(kernel_nums, kernel_size)
+        self.iim_stem = Conv(3 * kernel_nums, c2, k, s)
+
+    def forward(self, x):
+        """Return independent appearance and illumination-invariant structure feature maps."""
+        return self.rgb_stem(x), self.iim_stem(self.iim(x))
+
+
+class AdaptiveGatedFusion(nn.Module):
+    """Fuse appearance and structure streams with learnable channel-spatial gates.
+
+    A sigmoid gate is predicted from global channel context and local spatial evidence. It forms a convex mixture,
+    ``gate * appearance + (1 - gate) * structure``, so each location and channel can favor the evidence it needs. The
+    gate starts at exactly 0.5 and a small residual refinement keeps initialization stable.
+    """
+
+    def __init__(self, ch, c2, reduction=4, spatial_kernel=7, residual=True):
+        """Initialize adaptive two-stream fusion.
+
+        Args:
+            ch (list[int]): Input channels for ``[appearance, structure]``.
+            c2 (int): Output channels.
+            reduction (int): Channel-gate bottleneck reduction.
+            spatial_kernel (int): Odd kernel size used by the spatial gate.
+            residual (bool): Add a learnable residual refinement to the convex mixture.
+        """
+        super().__init__()
+        if len(ch) != 2:
+            raise ValueError(f"AdaptiveGatedFusion expects exactly two inputs, but received {len(ch)}.")
+        if spatial_kernel < 1 or spatial_kernel % 2 == 0:
+            raise ValueError(f"spatial_kernel must be a positive odd integer, but received {spatial_kernel}.")
+
+        self.appearance_proj = nn.Identity() if ch[0] == c2 else Conv(ch[0], c2, 1)
+        self.structure_proj = nn.Identity() if ch[1] == c2 else Conv(ch[1], c2, 1)
+        hidden = max(c2 // max(int(reduction), 1), 8)
+        self.channel_gate = nn.Sequential(
+            nn.Conv2d(2 * c2, hidden, 1, bias=True),
+            nn.SiLU(inplace=True),
+            nn.Conv2d(hidden, c2, 1, bias=True),
+        )
+        self.spatial_gate = nn.Conv2d(4, 1, spatial_kernel, padding=spatial_kernel // 2, bias=True)
+        nn.init.zeros_(self.channel_gate[-1].weight)
+        nn.init.zeros_(self.channel_gate[-1].bias)
+        nn.init.zeros_(self.spatial_gate.weight)
+        nn.init.zeros_(self.spatial_gate.bias)
+
+        self.refine = Conv(c2, c2, 3) if residual else None
+        self.refine_scale = nn.Parameter(torch.tensor(1e-3)) if residual else None
+
+    def fusion_gate(self, appearance, structure):
+        """Return the channel-spatial appearance weight used by the convex fusion."""
+        channel_context = torch.cat(
+            (
+                torch.nn.functional.adaptive_avg_pool2d(appearance, 1),
+                torch.nn.functional.adaptive_avg_pool2d(structure, 1),
+            ),
+            dim=1,
+        )
+        channel_logits = self.channel_gate(channel_context)
+        spatial_context = torch.cat(
+            (
+                appearance.mean(dim=1, keepdim=True),
+                appearance.amax(dim=1, keepdim=True),
+                structure.mean(dim=1, keepdim=True),
+                structure.amax(dim=1, keepdim=True),
+            ),
+            dim=1,
+        )
+        return torch.sigmoid(channel_logits + self.spatial_gate(spatial_context))
+
+    def forward(self, x):
+        """Adaptively combine ``[appearance, structure]`` tensors."""
+        if not isinstance(x, (list, tuple)) or len(x) != 2:
+            raise ValueError("AdaptiveGatedFusion forward expects [appearance, structure].")
+        appearance = self.appearance_proj(x[0])
+        structure = self.structure_proj(x[1])
+        if appearance.shape[-2:] != structure.shape[-2:]:
+            raise ValueError(
+                "AdaptiveGatedFusion inputs must have equal spatial sizes, "
+                f"but received {appearance.shape[-2:]} and {structure.shape[-2:]}."
+            )
+        gate = self.fusion_gate(appearance, structure)
+        fused = gate * appearance + (1.0 - gate) * structure
+        return fused if self.refine is None else fused + self.refine_scale * self.refine(fused)
 
 
 class Conv2(Conv):

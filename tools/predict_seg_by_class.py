@@ -7,8 +7,13 @@ contains only predictions of that class; the ``all`` image contains every class.
 Example (PowerShell):
     python tools/predict_seg_by_class.py `
         --model runs/segment/train/weights/best.pt `
-        --source C:/data/images `
-        --output runs/segment_by_class
+        --source C:/data/image_a.jpg C:/data/image_b.jpg `
+        --output runs/segment_by_class `
+        --square
+
+Labels include both the class name and confidence. ``--square`` forces square
+letterboxing, which can improve recall when training used square batches but
+single-image inference would otherwise use minimal rectangular padding.
 """
 
 from __future__ import annotations
@@ -34,7 +39,12 @@ def parse_args() -> argparse.Namespace:
         description="Save one YOLO segmentation result per class and one result containing all classes."
     )
     parser.add_argument("--model", required=True, type=Path, help="Path to a trained YOLO segmentation model (.pt).")
-    parser.add_argument("--source", required=True, help="Image, image directory, glob, URL, or other YOLO source.")
+    parser.add_argument(
+        "--source",
+        required=True,
+        nargs="+",
+        help="One or more images, image directories, globs, URLs, or other YOLO sources.",
+    )
     parser.add_argument("--output", type=Path, default=Path("runs/segment_by_class"), help="Output directory.")
     parser.add_argument("--imgsz", type=int, default=640, help="Inference image size.")
     parser.add_argument("--conf", type=float, default=0.25, help="Confidence threshold.")
@@ -43,9 +53,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--alpha", type=float, default=0.35, help="Mask fill opacity (0 to 1).")
     parser.add_argument("--line-width", type=int, default=2, help="Contour and box line width.")
     parser.add_argument("--show-boxes", action="store_true", help="Also draw bounding boxes (disabled by default).")
-    parser.add_argument("--hide-labels", action="store_true", help="Do not draw confidence scores.")
+    parser.add_argument("--hide-labels", action="store_true", help="Do not draw class names or confidence scores.")
     parser.add_argument("--no-fill", action="store_true", help="Draw mask contours without transparent mask fill.")
     parser.add_argument("--retina-masks", action="store_true", help="Use masks at original image resolution.")
+    parser.add_argument(
+        "--square",
+        action="store_true",
+        help="Use square letterboxing instead of minimal rectangular padding (can improve recall on some aspect ratios).",
+    )
     return parser.parse_args()
 
 
@@ -66,7 +81,7 @@ def safe_name(value: str) -> str:
 
 
 def class_color(class_id: int) -> tuple[int, int, int]:
-    """Return a stable BGR color for a class ID."""
+    """Return the original stable BGR color for a class ID."""
     palette_rgb = (
         (255, 56, 56), (255, 157, 151), (255, 112, 31), (255, 178, 29),
         (207, 210, 49), (72, 249, 10), (146, 204, 23), (61, 219, 134),
@@ -98,6 +113,7 @@ def draw_predictions(
     boxes: np.ndarray,
     classes: np.ndarray,
     scores: np.ndarray,
+    names: dict[int, str],
     selected_class: int | None,
     args: argparse.Namespace,
 ) -> np.ndarray:
@@ -108,6 +124,7 @@ def draw_predictions(
         if selected_class is not None and class_id != selected_class:
             continue
 
+        class_name = names.get(class_id, str(class_id))
         color = class_color(class_id)
         mask_u8 = mask.astype(np.uint8)
         contours, _ = cv2.findContours(mask_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -124,7 +141,7 @@ def draw_predictions(
         if args.hide_labels:
             continue
 
-        label = f"{float(score):.2f}"
+        label = f"{class_name} {float(score):.2f}"
         font_scale = max(0.45, min(image.shape[:2]) / 1000.0)
         thickness = max(1, args.line_width - 1)
         (text_width, text_height), baseline = cv2.getTextSize(
@@ -184,13 +201,30 @@ def save_result(result: Any, names: dict[int, str], output_dir: Path, index: int
     image_dir = output_dir / f"{index:06d}_{stem}"
 
     for class_id, class_name in names.items():
-        rendered = draw_predictions(image, masks, boxes, classes, scores, class_id, args)
+        rendered = draw_predictions(image, masks, boxes, classes, scores, names, class_id, args)
         filename = f"{stem}__class_{class_id:03d}_{safe_name(class_name)}.jpg"
         write_image(image_dir / filename, rendered)
 
-    combined = draw_predictions(image, masks, boxes, classes, scores, None, args)
+    combined = draw_predictions(image, masks, boxes, classes, scores, names, None, args)
     write_image(image_dir / f"{stem}__all.jpg", combined)
     return prediction_count
+
+
+def predict_sources(model: Any, sources: list[str], args: argparse.Namespace):
+    """Predict each source independently so result paths retain their original filenames."""
+    for source in sources:
+        yield from model.predict(
+            source=source,
+            imgsz=args.imgsz,
+            conf=args.conf,
+            iou=args.iou,
+            device=args.device,
+            retina_masks=args.retina_masks,
+            rect=not args.square,
+            stream=True,
+            save=False,
+            verbose=True,
+        )
 
 
 def main() -> int:
@@ -211,17 +245,7 @@ def main() -> int:
         raise ValueError("The model has no classes.")
 
     args.output.mkdir(parents=True, exist_ok=True)
-    results = model.predict(
-        source=args.source,
-        imgsz=args.imgsz,
-        conf=args.conf,
-        iou=args.iou,
-        device=args.device,
-        retina_masks=args.retina_masks,
-        stream=True,
-        save=False,
-        verbose=True,
-    )
+    results = predict_sources(model, args.source, args)
 
     image_count = 0
     total_predictions = 0

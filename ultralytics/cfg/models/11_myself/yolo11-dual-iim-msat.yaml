@@ -1,0 +1,49 @@
+# YOLO11 segmentation ablation V2: delayed RGB/IIM fusion and an MSAT second fusion stage.
+
+nc: 80
+scales:
+  # [depth, width, max_channels]
+  n: [0.50, 0.25, 1024]
+  s: [0.50, 0.50, 1024]
+  m: [0.50, 1.00, 512]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.50, 512]
+
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, DualIIMStem, [64, 3, 2, 8, 3]]           # 0: (RGB P1/2, IIM P1/2)
+  - [0, 1, Index, [-1, 0]]                            # 1: RGB P1/2
+  - [0, 1, Index, [-1, 1]]                            # 2: IIM P1/2
+  - [1, 1, Conv, [128, 3, 2]]                        # 3: RGB P2/4
+  - [2, 1, Conv, [128, 3, 2]]                        # 4: IIM P2/4
+  - [[3, 4], 1, AdaptiveGatedFusion, [128, 4, 7, True]] # 5: gated P2/4
+  - [5, 2, AttentionResiduals, [256, 0.25]]           # 6
+  - [[5, 6], 1, FSNetShuffle, [128, 1, 2]]            # 7: fused P2/4
+  - [3, 1, Conv, [256, 3, 2]]                        # 8: RGB P3/8
+  - [4, 1, Conv, [256, 3, 2]]                        # 9: IIM P3/8
+  - [[8, 9], 1, AdaptiveGatedFusion, [256, 4, 7, True]] # 10: gated P3/8
+  - [10, 2, AttentionResiduals, [512, 0.25]]          # 11
+  - [[10, 11], 1, FSNetShuffle, [256, 1, 2]]          # 12: fused P3/8
+  - [12, 1, Conv, [512, 3, 2]]                       # 13: P4/16
+  - [13, 2, AttentionResiduals, [512]]                # 14
+  - [[13, 14], 1, FSNetShuffle, [512, 2, 2]]          # 15: fused P4/16
+  - [15, 1, Conv, [1024, 3, 2]]                      # 16: P5/32
+  - [16, 2, AttentionResiduals, [1024]]               # 17
+  - [[16, 17], 1, FSNetShuffle, [1024, 2, 2]]         # 18
+  - [18, 1, SPPF, [1024, 5]]                         # 19
+  - [19, 2, C2PSA, [1024]]                           # 20: fused P5/32
+
+# Stage 1 aligns cross-scale context with CSAR. Stage 2 keeps P2-P5 as explicit MSAT states.
+head:
+  - [[7, 12, 15, 20], 1, CSAR, [512, 4, 1, 0.5, True]]  # 21: stage-1 P3/8
+  - [[7, 12, 15, 20], 1, CSAR, [512, 4, 2, 0.5, True]]  # 22: stage-1 P4/16
+  - [[7, 12, 15, 20], 1, CSAR, [1024, 4, 3, 0.5, True]] # 23: stage-1 P5/32
+
+  # Args: [c2, heads, target, embed_channels(0=auto), FFN ratio, window size, shortcut].
+  - [[7, 21, 22, 23], 1, MSAT, [128, 4, 0, 0, 2.0, 8, True]]   # 24: P2/4
+  - [[7, 21, 22, 23], 1, MSAT, [256, 4, 1, 0, 2.0, 8, True]]   # 25: P3/8
+  - [[7, 21, 22, 23], 1, MSAT, [512, 4, 2, 0, 2.0, 8, True]]   # 26: P4/16
+  - [[7, 21, 22, 23], 1, MSAT, [1024, 4, 3, 0, 2.0, 8, True]]  # 27: P5/32
+
+  # Standard Segment26 keeps V2 on the baseline loss for an architecture-only ablation.
+  - [[25, 24, 26, 27], 1, Segment26, [nc, 32, 256]]            # 28: P3, P2, P4, P5
