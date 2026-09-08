@@ -1,0 +1,70 @@
+# YOLO11 instance segmentation based on yolo11-6csar-iim.yaml.
+# Adds Multi-channel Multi-label Segmentation (MMS) outputs and ASL supervision.
+# Existing model and source files remain unchanged.
+# Training requirement: overlap_mask=False.
+
+# Parameters
+nc: 80
+scales:
+  # [depth, width, max_channels]
+  n: [0.50, 0.25, 1024]
+  s: [0.50, 0.50, 1024]
+  m: [0.50, 1.00, 512]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.50, 512]
+
+# Read by tools/train_yolo11_6csar_0906iim.py.
+mms:
+  loss: asl
+  gamma_pos: 4.0
+  gamma_neg: 1.0
+  clip: 0.05
+  pixel_gain: 0.5
+  cooccurrence_weight: 2.0
+
+# YOLO11-FSNetShuffle backbone with the YOLA illumination-invariant front-end.
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, IIMStem, [64, 3, 2, 8, 3]]        # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]]                 # 1-P2/4
+
+  - [-1, 2, AttentionResiduals, [256, 0.25]]   # 2-P2/4
+  - [[1, 2], 1, FSNetShuffle, [128, 1, 2]]     # 3-P2/4
+
+  - [3, 1, Conv, [256, 3, 2]]                  # 4-P3/8
+  - [4, 2, AttentionResiduals, [512, 0.25]]    # 5-P3/8
+  - [[4, 5], 1, FSNetShuffle, [256, 1, 2]]     # 6-P3/8
+
+  - [6, 1, Conv, [512, 3, 2]]                  # 7-P4/16
+  - [7, 2, AttentionResiduals, [512]]          # 8-P4/16
+  - [[7, 8], 1, FSNetShuffle, [512, 2, 2]]     # 9-P4/16
+
+  - [9, 1, Conv, [1024, 3, 2]]                 # 10-P5/32
+  - [10, 2, AttentionResiduals, [1024]]        # 11-P5/32
+  - [[10, 11], 1, FSNetShuffle, [1024, 2, 2]]  # 12-P5/32
+
+  - [-1, 1, SPPF, [1024, 5]]                  # 13
+  - [-1, 2, C2PSA, [1024]]                    # 14-P5/32
+
+# Original two-stage 6-CSAR head plus independent MMS logits at P3/P4/P5.
+head:
+  - [[3, 6, 9, 14], 1, CSAR, [512, 4, 1, 0.5, True]]    # 15-P3/8
+  - [[3, 6, 9, 14], 1, CSAR, [512, 4, 2, 0.5, True]]    # 16-P4/16
+  - [[3, 6, 9, 14], 1, CSAR, [1024, 4, 3, 0.5, True]]   # 17-P5/32
+
+  - [[3, 15, 16, 17], 1, CSAR, [512, 4, 1, 0.5, True]]  # 18-P3/8
+  - [[3, 15, 16, 17], 1, CSAR, [512, 4, 2, 0.5, True]]  # 19-P4/16
+  - [[3, 15, 16, 17], 1, CSAR, [1024, 4, 3, 0.5, True]] # 20-P5/32
+
+  # Activation-free 1x1 MMS projections. CBLinear supplies a raw independent logit per class;
+  # Index unwraps its single output without requiring changes to the shared model parser.
+  - [18, 1, CBLinear, [[80]]] # 21-P3/8 MMS list; trainer synchronizes 80 with dataset nc
+  - [21, 1, Index, [nc, 0]]  # 22-P3/8 MMS logits
+  - [19, 1, CBLinear, [[80]]] # 23-P4/16 MMS list; trainer synchronizes 80 with dataset nc
+  - [23, 1, Index, [nc, 0]]  # 24-P4/16 MMS logits
+  - [20, 1, CBLinear, [[80]]] # 25-P5/32 MMS list; trainer synchronizes 80 with dataset nc
+  - [25, 1, Index, [nc, 0]]  # 26-P5/32 MMS logits
+
+  # First half: original CSAR features. Second half: matching MMS logits.
+  # Head args: [nc, masks, prototypes, multi-label gain, co-occurrence pixel weight].
+  - [[18, 19, 20, 22, 24, 26], 1, Segment26MultiLabel, [nc, 32, 256, 0.5, 2.0]] # 27
