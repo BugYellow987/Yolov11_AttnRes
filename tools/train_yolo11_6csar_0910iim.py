@@ -100,13 +100,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--mask-ratio",
         type=int,
-        default=2,
+        default=4,
         dest="mask_ratio",
-        help="Mask downsample ratio. P2 prototypes require 2 so validation targets have matching resolution.",
+        help="Mask downsample ratio. The P2-aware prototype head keeps standard stride-4 masks.",
     )
     parser.add_argument("--cls-pw", type=float, default=0.5, dest="cls_pw")
     parser.add_argument("--pretrained", type=Path, default=None, help="Optional compatible .pt weights for warm-start.")
-    parser.add_argument("--project", default="runs/segment")
+    parser.add_argument(
+        "--project",
+        default=None,
+        help="Optional absolute output root. Omit it to use the normal runs/segment directory.",
+    )
     parser.add_argument("--name", default="yolo11-6csar-0910iim")
     return parser.parse_args(argv)
 
@@ -115,8 +119,8 @@ def build_overrides(args: argparse.Namespace) -> dict:
     """Translate CLI arguments into Ultralytics trainer overrides."""
     if not 0.0 <= args.cls_pw <= 1.0:
         raise ValueError("--cls-pw must be between 0 and 1.")
-    if args.mask_ratio != 2:
-        raise ValueError("The P2 prototype head requires --mask-ratio 2 for matching train/validation masks.")
+    if args.mask_ratio != 4:
+        raise ValueError("The P2-aware prototype head requires --mask-ratio 4 for the standard validator.")
     overrides = {
         "model": str(MODEL_CFG),
         "data": args.data,
@@ -131,9 +135,10 @@ def build_overrides(args: argparse.Namespace) -> dict:
         "overlap_mask": False,
         "seed": 0,
         "deterministic": True,
-        "project": args.project,
         "name": args.name,
     }
+    if args.project is not None:
+        overrides["project"] = args.project
     if args.pretrained is not None:
         overrides["pretrained"] = str(args.pretrained)
     return overrides

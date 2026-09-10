@@ -14,19 +14,21 @@ from tools.train_yolo11_6csar_0910iim import (
 )
 from ultralytics.cfg import get_cfg
 from ultralytics.models.yolo.segment.train import SegmentationTrainer
+from ultralytics.models.yolo.segment.val import SegmentationValidator
 from ultralytics.nn import tasks as nn_tasks
 from ultralytics.nn.modules.adaptive_iim_0910 import AdaptiveGatedIIMStem0910
 from ultralytics.nn.modules.conv import IIMStem
 from ultralytics.nn.modules.head import Segment26MultiLabel
-from ultralytics.nn.modules.segment_query_0910 import Segment26ClassQuery0910
+from ultralytics.nn.modules.segment_query_0910 import P2Proto26MultiLabel0910, Segment26ClassQuery0910
 from ultralytics.nn.tasks import SegmentationModel, yaml_model_load
+from ultralytics.utils import ops
 
 
 def _overlapping_batch() -> dict[str, torch.Tensor]:
     """Create two independently stored masks with a two-class overlap."""
-    masks = torch.zeros(2, 64, 64)
-    masks[0, 12:46, 10:42] = 1
-    masks[1, 24:58, 24:54] = 1
+    masks = torch.zeros(2, 32, 32)
+    masks[0, 6:23, 5:21] = 1
+    masks[1, 12:29, 12:27] = 1
     return {
         "img": torch.randn(1, 3, 128, 128),
         "batch_idx": torch.tensor([0.0, 0.0]),
@@ -38,8 +40,8 @@ def _overlapping_batch() -> dict[str, torch.Tensor]:
             ]
         ),
         "masks": masks,
-        "heatmaps": torch.zeros(1, 3, 64, 64),
-        "seedmaps": torch.zeros(1, 3, 64, 64),
+        "heatmaps": torch.zeros(1, 3, 32, 32),
+        "seedmaps": torch.zeros(1, 3, 32, 32),
     }
 
 
@@ -73,6 +75,7 @@ def test_0910_yaml_keeps_six_csar_and_adds_p2_query_conditioning():
     assert nn_tasks.Segment26MultiLabel is original_head
     assert isinstance(model.model[0], AdaptiveGatedIIMStem0910)
     assert isinstance(model.model[-1], Segment26ClassQuery0910)
+    assert isinstance(model.model[-1].proto, P2Proto26MultiLabel0910)
     assert model.model[-1].num_feature_levels == 4
     assert model.stride.tolist() == [4.0, 8.0, 16.0, 32.0]
     assert not isinstance(model.model[0], IIMStem)
@@ -95,7 +98,7 @@ def test_0910_full_asl_loss_reaches_p2_p3_p4_p5_mms_projections():
         (1, 3, 4, 4),
     ]
     prototypes = predictions["proto"][0]
-    assert prototypes.shape[-2:] == batch["masks"].shape[-2:] == (64, 64)
+    assert prototypes.shape[-2:] == batch["masks"].shape[-2:] == (32, 32)
     criterion = model.init_criterion()
     assert criterion.main_cls_asl_enabled is True
     loss, items = criterion(predictions, batch)
@@ -106,6 +109,32 @@ def test_0910_full_asl_loss_reaches_p2_p3_p4_p5_mms_projections():
     assert all(adapter.weight.grad is not None for adapter in model.model[-1].class_adapters)
 
 
+def test_standard_validator_receives_matching_stride_four_masks():
+    """Exercise the exact validation path that previously failed during mask IoU."""
+    model = IIMQueryASLSegmentationModel(MODEL_CFG, ch=3, nc=3, verbose=False).eval()
+    image = torch.rand(1, 3, 128, 128)
+    raw_predictions = model(image)
+    args = get_cfg(
+        overrides={"task": "segment", "mode": "val", "conf": 0.001, "iou": 0.7, "overlap_mask": False}
+    )
+    validator = SegmentationValidator(args=args)
+    validator.device = torch.device("cpu")
+    validator.nc = 3
+    validator.end2end = False
+    validator.process = ops.process_mask
+    predictions = validator.postprocess(raw_predictions)
+    batch = {
+        **_overlapping_batch(),
+        "ori_shape": [(128, 128)],
+        "ratio_pad": [((1.0, 1.0), (0.0, 0.0))],
+        "im_file": ["synthetic.jpg"],
+    }
+    prepared = validator._prepare_batch(0, batch)
+
+    assert prepared["masks"].shape[-2:] == predictions[0]["masks"].shape[-2:] == (32, 32)
+    assert prepared["masks"].flatten(1).shape[1] == predictions[0]["masks"].flatten(1).shape[1]
+
+
 def test_training_overrides_use_independent_masks_and_no_early_stop():
     """Expose the requested training controls without changing the YAML graph."""
     args = parse_args(["--data", "/home/d11405003/dataset/data.yaml"])
@@ -113,21 +142,22 @@ def test_training_overrides_use_independent_masks_and_no_early_stop():
     assert overrides["overlap_mask"] is False
     assert overrides["patience"] == 0
     assert overrides["batch"] == 8
-    assert overrides["mask_ratio"] == 2
+    assert overrides["mask_ratio"] == 4
     assert overrides["cls_pw"] == 0.5
     assert overrides["seed"] == 0
     assert overrides["deterministic"] is True
+    assert "project" not in overrides
 
 
 def test_training_rejects_a_mask_ratio_that_cannot_match_p2_prototypes():
-    """Prevent the 4x flattened-mask mismatch seen with the default ratio of four."""
-    args = parse_args(["--data", "/home/d11405003/dataset/data.yaml", "--mask-ratio", "4"])
+    """Keep P2-aware prototypes and standard validation targets at stride four."""
+    args = parse_args(["--data", "/home/d11405003/dataset/data.yaml", "--mask-ratio", "2"])
     try:
         build_overrides(args)
     except ValueError as error:
-        assert "requires --mask-ratio 2" in str(error)
+        assert "requires --mask-ratio 4" in str(error)
     else:
-        raise AssertionError("mask_ratio=4 should be rejected for the P2 prototype head")
+        raise AssertionError("mask_ratio=2 should be rejected for the P2-aware prototype head")
 
 
 def test_0910_trainer_serializes_the_portable_standard_model_class():

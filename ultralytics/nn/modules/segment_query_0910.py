@@ -7,9 +7,26 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .block import Proto26MultiLabel
 from .head import Segment26MultiLabel
 
-__all__ = ("Segment26ClassQuery0910",)
+__all__ = ("P2Proto26MultiLabel0910", "Segment26ClassQuery0910")
+
+
+class P2Proto26MultiLabel0910(Proto26MultiLabel):
+    """Generate standard stride-4 prototypes directly from a stride-4 P2 feature.
+
+    The regular Proto module upsamples its first input by two because ordinary
+    segmentation heads start at P3/8. This model starts at P2/4, so retaining
+    that upsample would produce stride-2 masks that the standard validator
+    cannot compare with its stride-4 targets.
+    """
+
+    def __init__(self, ch: tuple = (), c_: int = 256, c2: int = 32, nc: int = 80):
+        """Build the multi-scale prototype path without the redundant P2 upsample."""
+        super().__init__(ch, c_, c2, nc)
+        self.upsample = nn.Identity()
+        self.prototype_stride = 4
 
 
 class Segment26ClassQuery0910(Segment26MultiLabel):
@@ -30,6 +47,7 @@ class Segment26ClassQuery0910(Segment26MultiLabel):
         """Create one lightweight class-to-feature adapter per pyramid level."""
         super().__init__(nc, nm, npr, multilabel_gain, cooccurrence_weight, reg_max, end2end, ch)
         feature_channels = ch[: self.num_feature_levels]
+        self.proto = P2Proto26MultiLabel0910(feature_channels, self.npr, self.nm, nc)
         self.class_adapters = nn.ModuleList(nn.Conv2d(nc, channels, 1) for channels in feature_channels)
         self.condition_scale = nn.Parameter(torch.full((self.num_feature_levels,), float(condition_scale)))
         for adapter in self.class_adapters:
