@@ -17,6 +17,7 @@ from ultralytics.models.yolo.segment.train import SegmentationTrainer
 from ultralytics.nn.tasks import SegmentationModel, yaml_model_load
 from ultralytics.utils import RANK
 from ultralytics.utils.loss import MultiChannelDiceLoss, v8MultiLabelSegmentationLoss
+from ultralytics.utils.torch_utils import unwrap_model
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -112,6 +113,16 @@ class MMSASLTrainer(SegmentationTrainer):
         if weights:
             model.load(weights)
         return model
+
+    def save_model(self):
+        """Serialize EMA as the standard segmentation class so checkpoints remain portable for inference."""
+        ema_model = unwrap_model(self.ema.ema)
+        runtime_class = ema_model.__class__
+        ema_model.__class__ = SegmentationModel
+        try:
+            return super().save_model()
+        finally:
+            ema_model.__class__ = runtime_class
 
 
 def parse_args() -> argparse.Namespace:

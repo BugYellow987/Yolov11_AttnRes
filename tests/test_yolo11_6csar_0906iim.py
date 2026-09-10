@@ -1,11 +1,20 @@
 # Ultralytics AGPL-3.0 License - https://ultralytics.com/license
 """Tests for the standalone yolo11-6csar-0906iim MMS + ASL variant."""
 
+from types import SimpleNamespace
+
 import torch
 import torch.nn.functional as F
 
-from tools.train_yolo11_6csar_0906iim import AsymmetricLoss, MMSASLSegmentationModel, MODEL_CFG
+from tools.train_yolo11_6csar_0906iim import (
+    AsymmetricLoss,
+    MMSASLSegmentationModel,
+    MMSASLTrainer,
+    MODEL_CFG,
+)
 from ultralytics.cfg import get_cfg
+from ultralytics.models.yolo.segment.train import SegmentationTrainer
+from ultralytics.nn.tasks import SegmentationModel
 
 
 def _overlapping_batch() -> dict[str, torch.Tensor]:
@@ -62,3 +71,25 @@ def test_new_yaml_mms_asl_forward_and_full_loss_backward():
 
     loss.sum().backward()
     assert all(model.model[index].conv.weight.grad is not None for index in (21, 23, 25))
+
+
+def test_trainer_serializes_a_portable_standard_model_class():
+    """Ensure checkpoint saving temporarily exposes EMA as SegmentationModel and then restores its runtime class."""
+    model = MMSASLSegmentationModel(MODEL_CFG, ch=3, nc=3, verbose=False)
+    trainer = object.__new__(MMSASLTrainer)
+    trainer.ema = SimpleNamespace(ema=model)
+    observed = {}
+    original_save_model = SegmentationTrainer.save_model
+
+    def capture_model_class(self):
+        observed["saved_class"] = type(self.ema.ema)
+        return True
+
+    SegmentationTrainer.save_model = capture_model_class
+    try:
+        assert trainer.save_model() is True
+    finally:
+        SegmentationTrainer.save_model = original_save_model
+
+    assert observed["saved_class"] is SegmentationModel
+    assert type(trainer.ema.ema) is MMSASLSegmentationModel
