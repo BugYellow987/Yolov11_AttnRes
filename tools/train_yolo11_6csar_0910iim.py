@@ -97,6 +97,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--device", default="0")
     parser.add_argument("--patience", type=int, default=0)
     parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument(
+        "--mask-ratio",
+        type=int,
+        default=2,
+        dest="mask_ratio",
+        help="Mask downsample ratio. P2 prototypes require 2 so validation targets have matching resolution.",
+    )
     parser.add_argument("--cls-pw", type=float, default=0.5, dest="cls_pw")
     parser.add_argument("--pretrained", type=Path, default=None, help="Optional compatible .pt weights for warm-start.")
     parser.add_argument("--project", default="runs/segment")
@@ -108,6 +115,8 @@ def build_overrides(args: argparse.Namespace) -> dict:
     """Translate CLI arguments into Ultralytics trainer overrides."""
     if not 0.0 <= args.cls_pw <= 1.0:
         raise ValueError("--cls-pw must be between 0 and 1.")
+    if args.mask_ratio != 2:
+        raise ValueError("The P2 prototype head requires --mask-ratio 2 for matching train/validation masks.")
     overrides = {
         "model": str(MODEL_CFG),
         "data": args.data,
@@ -117,6 +126,7 @@ def build_overrides(args: argparse.Namespace) -> dict:
         "device": args.device,
         "patience": args.patience,
         "workers": args.workers,
+        "mask_ratio": args.mask_ratio,
         "cls_pw": args.cls_pw,
         "overlap_mask": False,
         "seed": 0,

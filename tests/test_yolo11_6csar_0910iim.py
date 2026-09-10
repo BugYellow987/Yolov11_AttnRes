@@ -24,9 +24,9 @@ from ultralytics.nn.tasks import SegmentationModel, yaml_model_load
 
 def _overlapping_batch() -> dict[str, torch.Tensor]:
     """Create two independently stored masks with a two-class overlap."""
-    masks = torch.zeros(2, 32, 32)
-    masks[0, 6:23, 5:21] = 1
-    masks[1, 12:29, 12:27] = 1
+    masks = torch.zeros(2, 64, 64)
+    masks[0, 12:46, 10:42] = 1
+    masks[1, 24:58, 24:54] = 1
     return {
         "img": torch.randn(1, 3, 128, 128),
         "batch_idx": torch.tensor([0.0, 0.0]),
@@ -38,8 +38,8 @@ def _overlapping_batch() -> dict[str, torch.Tensor]:
             ]
         ),
         "masks": masks,
-        "heatmaps": torch.zeros(1, 3, 32, 32),
-        "seedmaps": torch.zeros(1, 3, 32, 32),
+        "heatmaps": torch.zeros(1, 3, 64, 64),
+        "seedmaps": torch.zeros(1, 3, 64, 64),
     }
 
 
@@ -94,6 +94,8 @@ def test_0910_full_asl_loss_reaches_p2_p3_p4_p5_mms_projections():
         (1, 3, 8, 8),
         (1, 3, 4, 4),
     ]
+    prototypes = predictions["proto"][0]
+    assert prototypes.shape[-2:] == batch["masks"].shape[-2:] == (64, 64)
     criterion = model.init_criterion()
     assert criterion.main_cls_asl_enabled is True
     loss, items = criterion(predictions, batch)
@@ -111,9 +113,21 @@ def test_training_overrides_use_independent_masks_and_no_early_stop():
     assert overrides["overlap_mask"] is False
     assert overrides["patience"] == 0
     assert overrides["batch"] == 8
+    assert overrides["mask_ratio"] == 2
     assert overrides["cls_pw"] == 0.5
     assert overrides["seed"] == 0
     assert overrides["deterministic"] is True
+
+
+def test_training_rejects_a_mask_ratio_that_cannot_match_p2_prototypes():
+    """Prevent the 4x flattened-mask mismatch seen with the default ratio of four."""
+    args = parse_args(["--data", "/home/d11405003/dataset/data.yaml", "--mask-ratio", "4"])
+    try:
+        build_overrides(args)
+    except ValueError as error:
+        assert "requires --mask-ratio 2" in str(error)
+    else:
+        raise AssertionError("mask_ratio=4 should be rejected for the P2 prototype head")
 
 
 def test_0910_trainer_serializes_the_portable_standard_model_class():

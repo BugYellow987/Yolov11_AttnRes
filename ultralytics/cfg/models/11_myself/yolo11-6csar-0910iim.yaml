@@ -1,6 +1,7 @@
 # YOLO11 instance segmentation with adaptive IIM, a P2 output, MMS class-query feedback, and ASL.
 # Build this YAML through tools/train_yolo11_6csar_0910iim.py so the 0910 modules are registered temporarily.
 # The original 0906 model and shared Ultralytics registries remain unchanged.
+# Training requirement: overlap_mask=False and mask_ratio=2 because prototypes are generated from P2/4.
 
 # Parameters
 nc: 80
