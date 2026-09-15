@@ -61,6 +61,7 @@ from ultralytics.nn.modules import (
     GhostBottleneck,
     GhostConv,
     IIMStem,
+    ShadowIIMStem,
     HGBlock,
     HGStem,
     ImagePoolingAttn,
@@ -78,6 +79,7 @@ from ultralytics.nn.modules import (
     Segment,
     Segment26,
     Segment26MultiLabel,
+    Segment26MultiLabelShadow,
     SCA,
     SemanticSegment,
     TorchVision,
@@ -1698,6 +1700,7 @@ def parse_model(d, ch, verbose=True):
             ConvTranspose,
             GhostConv,
             IIMStem,
+            ShadowIIMStem,
             Bottleneck,
             GhostBottleneck,
             SPP,
@@ -1818,6 +1821,7 @@ def parse_model(d, ch, verbose=True):
                 Segment,
                 Segment26,
                 Segment26MultiLabel,
+                Segment26MultiLabelShadow,
                 YOLOESegment,
                 YOLOESegment26,
                 Pose,
@@ -1827,7 +1831,9 @@ def parse_model(d, ch, verbose=True):
             }
         ):
             args.extend([reg_max, end2end, [ch[x] for x in f]])
-            if m in {Segment, YOLOESegment, Segment26, Segment26MultiLabel, YOLOESegment26}:
+            if m in {
+                Segment, YOLOESegment, Segment26, Segment26MultiLabel, Segment26MultiLabelShadow, YOLOESegment26
+            }:
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
             if m in {
                 Detect,
@@ -1835,6 +1841,7 @@ def parse_model(d, ch, verbose=True):
                 Segment,
                 Segment26,
                 Segment26MultiLabel,
+                Segment26MultiLabelShadow,
                 YOLOESegment,
                 YOLOESegment26,
                 Pose,

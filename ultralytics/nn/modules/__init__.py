@@ -111,6 +111,7 @@ from .head import (
     YOLOESegment26,
     v10Detect,
 )
+from .shadow_dent import Segment26MultiLabelShadow, ShadowIIMStem
 from .transformer import (
     AIFI,
     MLP,
@@ -187,6 +188,8 @@ __all__ = (
     "GhostBottleneck",
     "GhostConv",
     "IIMStem",
+    "ShadowIIMStem",
+    "Segment26MultiLabelShadow",
     "IlluminationInvariantConv",
     "HGBlock",
     "HGStem",
