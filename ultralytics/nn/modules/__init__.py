@@ -112,6 +112,7 @@ from .head import (
     v10Detect,
 )
 from .shadow_dent import Segment26MultiLabelShadow, ShadowIIMStem
+from .dent_boundary import Segment26MultiLabelBoundary
 from .transformer import (
     AIFI,
     MLP,
@@ -190,6 +191,7 @@ __all__ = (
     "IIMStem",
     "ShadowIIMStem",
     "Segment26MultiLabelShadow",
+    "Segment26MultiLabelBoundary",
     "IlluminationInvariantConv",
     "HGBlock",
     "HGStem",

@@ -80,6 +80,7 @@ from ultralytics.nn.modules import (
     Segment26,
     Segment26MultiLabel,
     Segment26MultiLabelShadow,
+    Segment26MultiLabelBoundary,
     SCA,
     SemanticSegment,
     TorchVision,
@@ -91,6 +92,7 @@ from ultralytics.nn.modules import (
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, LOGGER, SETTINGS, WINDOWS, YAML, colorstr, emojis
 from ultralytics.utils.checks import REMOTE_FILE_PREFIXES, check_file, check_requirements, check_suffix, check_yaml
+from ultralytics.utils.dent_boundary_loss import v8BoundaryMultiLabelSegmentationLoss
 from ultralytics.utils.loss import (
     E2ELoss,
     PoseLoss26,
@@ -597,11 +599,12 @@ class SegmentationModel(DetectionModel):
 
     def init_criterion(self):
         """Initialize the loss criterion for the SegmentationModel."""
-        loss_class = (
-            v8MultiLabelSegmentationLoss
-            if isinstance(self.model[-1], Segment26MultiLabel)
-            else v8SegmentationLoss
-        )
+        if isinstance(self.model[-1], Segment26MultiLabelBoundary):
+            loss_class = v8BoundaryMultiLabelSegmentationLoss
+        elif isinstance(self.model[-1], Segment26MultiLabel):
+            loss_class = v8MultiLabelSegmentationLoss
+        else:
+            loss_class = v8SegmentationLoss
         return E2ELoss(self, loss_class) if getattr(self, "end2end", False) else loss_class(self)
 
 
@@ -1822,6 +1825,7 @@ def parse_model(d, ch, verbose=True):
                 Segment26,
                 Segment26MultiLabel,
                 Segment26MultiLabelShadow,
+                Segment26MultiLabelBoundary,
                 YOLOESegment,
                 YOLOESegment26,
                 Pose,
@@ -1832,7 +1836,13 @@ def parse_model(d, ch, verbose=True):
         ):
             args.extend([reg_max, end2end, [ch[x] for x in f]])
             if m in {
-                Segment, YOLOESegment, Segment26, Segment26MultiLabel, Segment26MultiLabelShadow, YOLOESegment26
+                Segment,
+                YOLOESegment,
+                Segment26,
+                Segment26MultiLabel,
+                Segment26MultiLabelShadow,
+                Segment26MultiLabelBoundary,
+                YOLOESegment26,
             }:
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
             if m in {
@@ -1842,6 +1852,7 @@ def parse_model(d, ch, verbose=True):
                 Segment26,
                 Segment26MultiLabel,
                 Segment26MultiLabelShadow,
+                Segment26MultiLabelBoundary,
                 YOLOESegment,
                 YOLOESegment26,
                 Pose,
