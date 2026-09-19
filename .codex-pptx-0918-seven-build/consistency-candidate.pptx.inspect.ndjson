@@ -1,0 +1,25 @@
+{"kind":"deck","id":"pr/fs9q13","name":"Deck"}
+{"kind":"layout","layoutId":"b55e4a09-94a8-438f-8adc-f40303a6e9c0","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"aa2ce8dc-0363-40d4-843e-579b8a524b7e","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/g4cvub","slide":1,"title":"Consistency：陰影前後輸出穩定","textShapes":13}
+{"kind":"textbox","id":"sh/1sza1c3a","slide":1,"name":"title","text":"Consistency：陰影前後輸出穩定","textPreview":"Consistency：陰影前後輸出穩定","textChars":20,"textLines":1,"bbox":[68,43,1136,63]}
+{"kind":"textbox","id":"sh/e58bqx4j","slide":1,"name":"subtitle","text":"與 shadow-aug 相同的雙視角；另加 gain 0.2 的五尺度一致性","textPreview":"與 shadow-aug 相同的雙視角；另加 gain 0.2 的五尺度一致性","textChars":39,"textLines":1,"bbox":[70,109,1130,35]}
+{"kind":"textbox","id":"sh/fqhsz2l4","slide":1,"name":"step-0","text":"1  成對監督仍保留","textPreview":"1  成對監督仍保留","textChars":10,"textLines":1,"bbox":[70,178,685,34]}
+{"kind":"textbox","id":"sh/ovatwrm1","slide":1,"name":"formula-0","text":"Lpair = ½[L₀(x,Y) + L₀(x̃,Y)]","textPreview":"Lpair = ½[L₀(x,Y) + L₀(x̃,Y)]","textChars":29,"textLines":1,"bbox":[73,219,685,48]}
+{"kind":"textbox","id":"sh/pwja5w36","slide":1,"name":"explain-0","text":"陰影圖不靠 teacher 取代 GT，兩個視角都受真實 mask 監督。","textPreview":"陰影圖不靠 teacher 取代 GT，兩個視角都受真實 mask 監督。","textChars":37,"textLines":1,"bbox":[73,271,684,48]}
+{"kind":"textbox","id":"sh/2tsbuh4v","slide":1,"name":"step-1","text":"2  只有 teacher 符合 GT 才比較","textPreview":"2  只有 teacher 符合 GT 才比較","textChars":23,"textLines":1,"bbox":[70,329,685,34]}
+{"kind":"textbox","id":"sh/nu1s3mlg","slide":1,"name":"formula-1","text":"P = {Y=1, t≥0.7}；N = {Y=0, t≤0.3}","textPreview":"P = {Y=1, t≥0.7}；N = {Y=0, t≤0.3}","textChars":33,"textLines":1,"bbox":[73,370,685,48]}
+{"kind":"textbox","id":"sh/czat0rmx","slide":1,"name":"explain-1","text":"t 是原圖 sigmoid 輸出並 stop-gradient；P、N 分別平均。","textPreview":"t 是原圖 sigmoid 輸出並 stop-gradient；P、N 分別平均。","textChars":41,"textLines":1,"bbox":[73,422,684,48]}
+{"kind":"textbox","id":"sh/x03u9w3i","slide":1,"name":"step-2","text":"3  拉近陰影與原圖機率","textPreview":"3  拉近陰影與原圖機率","textChars":12,"textLines":1,"bbox":[70,480,685,34]}
+{"kind":"textbox","id":"sh/pcnudcny","slide":1,"name":"formula-2","text":"LC = ⅕Σs meanP,N[(ps − stopgrad(ts))²]","textPreview":"LC = ⅕Σs meanP,N[(ps − stopgrad(ts))²]","textChars":38,"textLines":1,"bbox":[73,521,685,48]}
+{"kind":"textbox","id":"sh/4rutk7md","slide":1,"name":"explain-2","text":"陰影 student 在五個 MSAT 尺度計算；總 loss 增加 0.2LC。","textPreview":"陰影 student 在五個 MSAT 尺度計算；總 loss 增加 0.2LC。","textChars":41,"textLines":1,"bbox":[73,573,684,48]}
+{"kind":"textbox","id":"sh/2pcbih47","slide":1,"name":"photo-caption","text":"0912 推論示例（非 GT）","textPreview":"0912 推論示例（非 GT）","textChars":15,"textLines":1,"bbox":[803,510,405,27]}
+{"kind":"textbox","id":"sh/dgnuhwnu","slide":1,"name":"callout","text":"原圖若漏掉真 D，該像素不當 teacher；仍由兩視角 GT loss 學習。","textPreview":"原圖若漏掉真 D，該像素不當 teacher；仍由兩視角 GT loss 學習。","textChars":40,"textLines":1,"bbox":[802,562,408,96]}
+{"kind":"image","id":"im/kv61gjal","slide":1,"name":"","alt":"使用者提供的 0912 貨櫃損傷推論示例，含陰影區域及 D、R 預測標記","bbox":[802,192,410,308]}
+{"kind":"notes","id":"nt/g4cvub","slide":1,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-consistency.yaml。數學與訓練流程來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。圖片為使用者提供的 0912 推論疊圖，不是 GT，也不是本次七版的測試結果。"}
+{"kind":"slide","id":"sl/em3d6p","slide":2,"title":"Consistency：陰影前後輸出穩定：影響與驗證","textShapes":3}
+{"kind":"textbox","id":"sh/nuxkzq9s","slide":2,"name":"title","text":"Consistency：陰影前後輸出穩定：影響與驗證","textPreview":"Consistency：陰影前後輸出穩定：影響與驗證","textChars":26,"textLines":1,"bbox":[68,43,1136,62]}
+{"kind":"textbox","id":"sh/8v618vad","slide":2,"name":"subtitle","text":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textPreview":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textChars":34,"textLines":1,"bbox":[70,109,1130,37]}
+{"kind":"textbox","id":"sh/uxoja5sj","slide":2,"name":"footer","text":"teacher 是同一模型原圖分支，沒有 EMA、第二套權重或陰影類別。","textPreview":"teacher 是同一模型原圖分支，沒有 EMA、第二套權重或陰影類別。","textChars":36,"textLines":1,"bbox":[70,628,1135,61]}
+{"kind":"table","id":"tb/szi1g7qx","slide":2,"name":"","rows":4,"cols":2,"preview":"影像辨識作用 | 對原圖已判對的 D，要求陰影圖保留相近機率。對 GT 背景，可信原圖低分可壓制陰影假陽性。","bbox":[69,171,1142,432]}
+{"kind":"notes","id":"nt/em3d6p","slide":2,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-consistency.yaml。機制來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。所有改善敘述均為待驗證假說，目前沒有完整真實貨櫃資料集的七版結果。"}

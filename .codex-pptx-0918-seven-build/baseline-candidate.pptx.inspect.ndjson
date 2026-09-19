@@ -1,0 +1,25 @@
+{"kind":"deck","id":"pr/tzq9d4","name":"Deck"}
+{"kind":"layout","layoutId":"b5d8acaf-1238-4a99-8060-13d3fbf56761","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"0f8d6d19-453d-478a-bcd9-db015c6491fc","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/gq3gdy","slide":1,"title":"Baseline：0912 原始多標籤目標","textShapes":13}
+{"kind":"textbox","id":"sh/1czilovq","slide":1,"name":"title","text":"Baseline：0912 原始多標籤目標","textPreview":"Baseline：0912 原始多標籤目標","textChars":21,"textLines":1,"bbox":[68,43,1136,63]}
+{"kind":"textbox","id":"sh/e98zqtwf","slide":1,"name":"subtitle","text":"新增陰影、一致性、邊界、真交集增益均為 0","textPreview":"新增陰影、一致性、邊界、真交集增益均為 0","textChars":21,"textLines":1,"bbox":[70,109,1130,35]}
+{"kind":"textbox","id":"sh/fah0jyd0","slide":1,"name":"step-0","text":"1  獨立實例保留 D／R 重疊","textPreview":"1  獨立實例保留 D／R 重疊","textChars":16,"textLines":1,"bbox":[70,178,685,34]}
+{"kind":"textbox","id":"sh/ozahw3eh","slide":1,"name":"formula-0","text":"Yc(u) = maxᵢ:cᵢ=c Mi(u)","textPreview":"Yc(u) = maxᵢ:cᵢ=c Mi(u)","textChars":23,"textLines":1,"bbox":[73,219,685,48]}
+{"kind":"textbox","id":"sh/p0jip8v2","slide":1,"name":"explain-0","text":"同一像素可同時標為 D 與 R。訓練必須使用 overlap_mask=False。","textPreview":"同一像素可同時標為 D 與 R。訓練必須使用 overlap_mask=False。","textChars":42,"textLines":1,"bbox":[73,271,684,48]}
+{"kind":"textbox","id":"sh/2d8zutwb","slide":1,"name":"step-1","text":"2  既有共存權重","textPreview":"2  既有共存權重","textChars":9,"textLines":1,"bbox":[70,329,685,34]}
+{"kind":"textbox","id":"sh/ne10nydw","slide":1,"name":"formula-1","text":"w(u) = 1 + 2·1[Σc Yc(u) > 1]","textPreview":"w(u) = 1 + 2·1[Σc Yc(u) > 1]","textChars":28,"textLines":1,"bbox":[73,370,685,48]}
+{"kind":"textbox","id":"sh/4j6hkjed","slide":1,"name":"explain-1","text":"兩類以上重疊像素的 BCE 權重為 3，其餘為 1。","textPreview":"兩類以上重疊像素的 BCE 權重為 3，其餘為 1。","textChars":26,"textLines":1,"bbox":[73,422,684,48]}
+{"kind":"textbox","id":"sh/54fid4vi","slide":1,"name":"step-2","text":"3  既有五尺度多標籤目標","textPreview":"3  既有五尺度多標籤目標","textChars":13,"textLines":1,"bbox":[70,480,685,34]}
+{"kind":"textbox","id":"sh/hobahsni","slide":1,"name":"formula-2","text":"LMSAT = ½ L加權BCE + ½ LDice","textPreview":"LMSAT = ½ L加權BCE + ½ LDice","textChars":26,"textLines":1,"bbox":[73,521,685,48]}
+{"kind":"textbox","id":"sh/gni9876x","slide":1,"name":"explain-2","text":"五尺度平均後以原 gain 0.5 納入 semantic loss。","textPreview":"五尺度平均後以原 gain 0.5 納入 semantic loss。","textChars":35,"textLines":1,"bbox":[73,573,684,48]}
+{"kind":"textbox","id":"sh/ul0r6xor","slide":1,"name":"photo-caption","text":"0912 推論示例（非 GT）","textPreview":"0912 推論示例（非 GT）","textChars":15,"textLines":1,"bbox":[803,510,405,27]}
+{"kind":"textbox","id":"sh/pcbalcne","slide":1,"name":"callout","text":"本版沒有額外陰影訓練，作為其他六版的共同對照。","textPreview":"本版沒有額外陰影訓練，作為其他六版的共同對照。","textChars":23,"textLines":1,"bbox":[802,562,408,96]}
+{"kind":"image","id":"im/0zu943u9","slide":1,"name":"","alt":"使用者提供的 0912 貨櫃損傷推論示例，含陰影區域及 D、R 預測標記","bbox":[802,192,410,308]}
+{"kind":"notes","id":"nt/gq3gdy","slide":1,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-baseline.yaml。數學與訓練流程來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。圖片為使用者提供的 0912 推論疊圖，不是 GT，也不是本次七版的測試結果。"}
+{"kind":"slide","id":"sl/gmkwgo","slide":2,"title":"Baseline：0912 原始多標籤目標：影響與驗證","textShapes":3}
+{"kind":"textbox","id":"sh/mlwzy9ov","slide":2,"name":"title","text":"Baseline：0912 原始多標籤目標：影響與驗證","textPreview":"Baseline：0912 原始多標籤目標：影響與驗證","textChars":27,"textLines":1,"bbox":[68,43,1136,62]}
+{"kind":"textbox","id":"sh/9oni9onm","slide":2,"name":"subtitle","text":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textPreview":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textChars":34,"textLines":1,"bbox":[70,109,1130,37]}
+{"kind":"textbox","id":"sh/vqp0by5c","slide":2,"name":"footer","text":"與 shadow-aug 比較可測合成陰影曝光的額外效果。主架構與推論輸出保持相同。","textPreview":"與 shadow-aug 比較可測合成陰影曝光的額外效果。主架構與推論輸出保持相同。","textChars":42,"textLines":1,"bbox":[70,628,1135,61]}
+{"kind":"table","id":"tb/10re90n2","slide":2,"name":"","rows":4,"cols":2,"preview":"影像辨識作用 | 獨立 sigmoid 與 mask 保留 D、R 同時為前景的能力。共存加權減少稀少交疊像素被背景淹沒。","bbox":[69,171,1142,432]}
+{"kind":"notes","id":"nt/gmkwgo","slide":2,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-baseline.yaml。機制來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。所有改善敘述均為待驗證假說，目前沒有完整真實貨櫃資料集的七版結果。"}

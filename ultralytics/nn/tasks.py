@@ -93,6 +93,7 @@ from ultralytics.nn.modules import (
 from ultralytics.utils import DEFAULT_CFG_DICT, LOGGER, SETTINGS, WINDOWS, YAML, colorstr, emojis
 from ultralytics.utils.checks import REMOTE_FILE_PREFIXES, check_file, check_requirements, check_suffix, check_yaml
 from ultralytics.utils.dent_boundary_loss import v8BoundaryMultiLabelSegmentationLoss
+from ultralytics.utils.training_aux_0918 import TrainingAuxSegmentationLoss, training_auxiliary_loss
 from ultralytics.utils.loss import (
     E2ELoss,
     PoseLoss26,
@@ -597,8 +598,18 @@ class SegmentationModel(DetectionModel):
         """
         super().__init__(cfg=cfg, ch=ch, nc=nc, verbose=verbose)
 
+    def loss(self, batch, preds=None):
+        """Enable YAML training-only constraints without changing prediction or legacy model behavior."""
+        if "training_aux" in self.yaml:
+            return training_auxiliary_loss(self, batch, preds)
+        return super().loss(batch, preds)
+
     def init_criterion(self):
         """Initialize the loss criterion for the SegmentationModel."""
+        if "training_aux" in self.yaml:
+            if type(self.model[-1]) is not Segment26MultiLabel or getattr(self, "end2end", False):
+                raise ValueError("training_aux requires the original non-end2end Segment26MultiLabel head.")
+            return TrainingAuxSegmentationLoss(self)
         if isinstance(self.model[-1], Segment26MultiLabelBoundary):
             loss_class = v8BoundaryMultiLabelSegmentationLoss
         elif isinstance(self.model[-1], Segment26MultiLabel):

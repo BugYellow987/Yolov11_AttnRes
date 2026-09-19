@@ -1,0 +1,25 @@
+{"kind":"deck","id":"pr/2kx7fc","name":"Deck"}
+{"kind":"layout","layoutId":"b5a301f3-2d87-4030-8480-4eb6d4af5968","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"418363d2-cefd-4c54-afa3-001404e717b3","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/xiquea","slide":1,"title":"Overlap：凹洞與生鏽真交集","textShapes":13}
+{"kind":"textbox","id":"sh/fmpw7a58","slide":1,"name":"title","text":"Overlap：凹洞與生鏽真交集","textPreview":"Overlap：凹洞與生鏽真交集","textChars":16,"textLines":1,"bbox":[68,43,1136,63]}
+{"kind":"textbox","id":"sh/0nydgf6t","slide":1,"name":"subtitle","text":"無合成陰影；在原有共存加權之外，新增 D／R joint loss","textPreview":"無合成陰影；在原有共存加權之外，新增 D／R joint loss","textChars":33,"textLines":1,"bbox":[70,109,1130,35]}
+{"kind":"textbox","id":"sh/1o7e9kne","slide":1,"name":"step-0","text":"1  原生 GT 解析度先求交集","textPreview":"1  原生 GT 解析度先求交集","textChars":16,"textLines":1,"bbox":[70,178,685,34]}
+{"kind":"textbox","id":"sh/29gvipoz","slide":1,"name":"formula-0","text":"T = YD ∩ YR；U = YD ∪ YR","textPreview":"T = YD ∩ YR；U = YD ∪ YR","textChars":23,"textLines":1,"bbox":[73,219,685,48]}
+{"kind":"textbox","id":"sh/napwbu5k","slide":1,"name":"explain-0","text":"先交集再縮圖，避免相鄰 D、R 被粗尺度捏成假交疊。","textPreview":"先交集再縮圖，避免相鄰 D、R 被粗尺度捏成假交疊。","textChars":26,"textLines":1,"bbox":[73,271,684,48]}
+{"kind":"textbox","id":"sh/obidkf65","slide":1,"name":"step-1","text":"2  兩類同時成立的分數","textPreview":"2  兩類同時成立的分數","textChars":12,"textLines":1,"bbox":[70,329,685,34]}
+{"kind":"textbox","id":"sh/pcredkna","slide":1,"name":"formula-1","text":"qDR = σ(zD)·σ(zR)","textPreview":"qDR = σ(zD)·σ(zR)","textChars":17,"textLines":1,"bbox":[73,370,685,48]}
+{"kind":"textbox","id":"sh/ad0vmpov","slide":1,"name":"explain-1","text":"它是訓練分數，不宣稱已校準的統計聯合機率。","textPreview":"它是訓練分數，不宣稱已校準的統計聯合機率。","textChars":21,"textLines":1,"bbox":[73,422,684,48]}
+{"kind":"textbox","id":"sh/be9wfu5g","slide":1,"name":"step-2","text":"3  穩定 joint-logit 監督","textPreview":"3  穩定 joint-logit 監督","textChars":20,"textLines":1,"bbox":[70,480,685,34]}
+{"kind":"textbox","id":"sh/belc7qpg","slide":1,"name":"formula-2","text":"logit(qDR) = a+b−logsumexp(0,a,b)","textPreview":"logit(qDR) = a+b−logsumexp(0,a,b)","textChars":33,"textLines":1,"bbox":[73,521,685,48]}
+{"kind":"textbox","id":"sh/qdcvelov","slide":1,"name":"explain-2","text":"僅真交集圖片啟用，五尺度平均後以 gain 0.2 加入 sem_loss。","textPreview":"僅真交集圖片啟用，五尺度平均後以 gain 0.2 加入 sem_loss。","textChars":38,"textLines":1,"bbox":[73,573,684,48]}
+{"kind":"textbox","id":"sh/cfudgv61","slide":1,"name":"photo-caption","text":"0912 推論示例（非 GT）","textPreview":"0912 推論示例（非 GT）","textChars":15,"textLines":1,"bbox":[803,510,405,27]}
+{"kind":"textbox","id":"sh/3a1c3qpk","slide":1,"name":"callout","text":"D-only 樣本的新增交集 loss 為 0，不要求凹洞一定伴隨生鏽。","textPreview":"D-only 樣本的新增交集 loss 為 0，不要求凹洞一定伴隨生鏽。","textChars":36,"textLines":1,"bbox":[802,562,408,96]}
+{"kind":"image","id":"im/u18zat0n","slide":1,"name":"","alt":"使用者提供的 0912 貨櫃損傷推論示例，含陰影區域及 D、R 預測標記","bbox":[802,192,410,308]}
+{"kind":"notes","id":"nt/xiquea","slide":1,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-overlap.yaml。數學與訓練流程來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。圖片為使用者提供的 0912 推論疊圖，不是 GT，也不是本次七版的測試結果。"}
+{"kind":"slide","id":"sl/wrmmc4","slide":2,"title":"Overlap：凹洞與生鏽真交集：影響與驗證","textShapes":3}
+{"kind":"textbox","id":"sh/ylg3exoj","slide":2,"name":"title","text":"Overlap：凹洞與生鏽真交集：影響與驗證","textPreview":"Overlap：凹洞與生鏽真交集：影響與驗證","textChars":22,"textLines":1,"bbox":[68,43,1136,62]}
+{"kind":"textbox","id":"sh/lo729cna","slide":2,"name":"subtitle","text":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textPreview":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textChars":34,"textLines":1,"bbox":[70,109,1130,37]}
+{"kind":"textbox","id":"sh/7qpkbm50","slide":2,"name":"footer","text":"原本的 D／R 共存能力保持不變；本版測試的是「額外真交集約束」。","textPreview":"原本的 D／R 共存能力保持不變；本版測試的是「額外真交集約束」。","textChars":33,"textLines":1,"bbox":[70,628,1135,61]}
+{"kind":"table","id":"tb/98nihs7y","slide":2,"name":"","rows":4,"cols":2,"preview":"影像辨識作用 | 原本的共存 BCE 權重已是 3；新增項再要求 D 與 R 的乘積對準真正同像素交疊。","bbox":[69,171,1142,432]}
+{"kind":"notes","id":"nt/wrmmc4","slide":2,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-overlap.yaml。機制來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。所有改善敘述均為待驗證假說，目前沒有完整真實貨櫃資料集的七版結果。"}

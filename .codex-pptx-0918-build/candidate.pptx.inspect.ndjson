@@ -1,0 +1,27 @@
+{"kind":"deck","id":"pr/wbh02d","name":"Deck"}
+{"kind":"layout","layoutId":"2c42a4e9-fe78-4727-af31-7781cd9a4330","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"dfeca239-73ee-460d-b9ca-fbbfe7871cf3","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/9vh36o","slide":1,"title":"陰影下的凹洞辨識：主架構不變","textShapes":13}
+{"kind":"textbox","id":"sh/5c7ilova","slide":1,"name":"title","text":"陰影下的凹洞辨識：主架構不變","textPreview":"陰影下的凹洞辨識：主架構不變","textChars":14,"textLines":1,"bbox":[66,43,1150,66]}
+{"kind":"textbox","id":"sh/i9gzq9cz","slide":1,"name":"subtitle","text":"0912 YOLO11／IIMStem／AttentionResiduals／FSNetShuffle／10 CSAR／MSAT 皆保留；只改訓練","textPreview":"0912 YOLO11／IIMStem／AttentionResiduals／FSNetShuffle／10 CSAR／MSAT 皆保留；只改訓練","textChars":73,"textLines":1,"bbox":[69,111,1110,34]}
+{"kind":"textbox","id":"sh/3ap0jed4","slide":1,"name":"shadow-step","text":"1  合成陰影，保留原 GT","textPreview":"1  合成陰影，保留原 GT","textChars":14,"textLines":1,"bbox":[69,177,685,35]}
+{"kind":"textbox","id":"sh/g7yhojut","slide":1,"name":"shadow-formula","text":"x̃ = clip[x × (1 − a·σ(d / 0.15)), 0, 1]","textPreview":"x̃ = clip[x × (1 − a·σ(d / 0.15)), 0, 1]","textChars":40,"textLines":1,"bbox":[72,220,670,47]}
+{"kind":"textbox","id":"sh/h87yhove","slide":1,"name":"shadow-explain","text":"a ∈ [0.15, 0.45]；隨機方向的柔邊陰影。像素幾何、bbox 與 mask 不變。","textPreview":"a ∈ [0.15, 0.45]；隨機方向的柔邊陰影。像素幾何、bbox 與 mask 不變。","textChars":47,"textLines":1,"bbox":[72,268,673,58]}
+{"kind":"textbox","id":"sh/u5gzm9cn","slide":1,"name":"pair-step","text":"2  原圖與陰影圖都做完整監督","textPreview":"2  原圖與陰影圖都做完整監督","textChars":15,"textLines":1,"bbox":[69,340,685,35]}
+{"kind":"textbox","id":"sh/v6pgfed8","slide":1,"name":"pair-formula","text":"Lpair = ½ [L₀(x, Y) + L₀(x̃, Y)]","textPreview":"Lpair = ½ [L₀(x, Y) + L₀(x̃, Y)]","textChars":32,"textLines":1,"bbox":[72,381,670,45]}
+{"kind":"textbox","id":"sh/83ehkzuh","slide":1,"name":"pair-explain","text":"同一模型一次處理 2B 個視角；陰影中的 D 仍是 D，不能改成背景。","textPreview":"同一模型一次處理 2B 個視角；陰影中的 D 仍是 D，不能改成背景。","textChars":35,"textLines":1,"bbox":[72,430,675,58]}
+{"kind":"textbox","id":"sh/t4nyd4v2","slide":1,"name":"cons-step","text":"3  只模仿正確且高信心的原圖預測","textPreview":"3  只模仿正確且高信心的原圖預測","textChars":17,"textLines":1,"bbox":[69,511,685,35]}
+{"kind":"textbox","id":"sh/hczu1c3q","slide":1,"name":"cons-formula","text":"Lcons = mean[(p陰影 − stopgrad(p原圖))²]","textPreview":"Lcons = mean[(p陰影 − stopgrad(p原圖))²]","textChars":36,"textLines":1,"bbox":[72,553,690,45]}
+{"kind":"textbox","id":"sh/grqd87m5","slide":1,"name":"cons-explain","text":"GT 前景且 p原圖 ≥ 0.7，或 GT 背景且 p原圖 ≤ 0.3；五尺度平均，gain = 0.2。","textPreview":"GT 前景且 p原圖 ≥ 0.7，或 GT 背景且 p原圖 ≤ 0.3；五尺度平均，gain = 0.2。","textChars":53,"textLines":1,"bbox":[72,601,690,54]}
+{"kind":"textbox","id":"sh/up8v6x4z","slide":1,"name":"photo-caption","text":"0912 推論示例（非 GT）","textPreview":"0912 推論示例（非 GT）","textChars":15,"textLines":1,"bbox":[801,502,412,26]}
+{"kind":"textbox","id":"sh/tozuxs3e","slide":1,"name":"slide-note","text":"核心問題：讓模型辨識陰影中的破損，而非輸出「陰影」類別。","textPreview":"核心問題：讓模型辨識陰影中的破損，而非輸出「陰影」類別。","textChars":28,"textLines":1,"bbox":[800,553,407,83]}
+{"kind":"image","id":"im/07i98vex","slide":1,"name":"","alt":"使用者提供的 0912 貨櫃損傷推論示例，可見不同明暗區及 D、R 預測標記","bbox":[800,184,412,309]}
+{"kind":"notes","id":"nt/9vh36o","slide":1,"text":"公式來源：ultralytics/utils/training_aux_ops.py 的 shadow_view、consistency_loss，以及 ultralytics/utils/training_aux_0918.py 的 training_auxiliary_loss。圖片由使用者提供；這是 0912 推論疊圖，不是 GT，不能據此宣稱七版效果。"}
+{"kind":"slide","id":"sl/9ai8bu","slide":2,"title":"七版消融：陰影、輪廓與真 D／R 交集","textShapes":5}
+{"kind":"textbox","id":"sh/wjqp0j6d","slide":2,"name":"title","text":"七版消融：陰影、輪廓與真 D／R 交集","textPreview":"七版消融：陰影、輪廓與真 D／R 交集","textChars":19,"textLines":1,"bbox":[66,43,1150,66]}
+{"kind":"textbox","id":"sh/vih87eps","slide":2,"name":"subtitle","text":"全部維持相同推論圖；原 0912 多標籤共存加權仍存在","textPreview":"全部維持相同推論圖；原 0912 多標籤共存加權仍存在","textChars":27,"textLines":1,"bbox":[69,111,1110,32]}
+{"kind":"textbox","id":"sh/5ojqdo7a","slide":2,"name":"boundary-detail","text":"邊界  B(M) = max₃×₃(M) − min₃×₃(M)；用實例 mask 的輪廓監督，不把 RGB 陰影線當 GT。","textPreview":"邊界  B(M) = max₃×₃(M) − min₃×₃(M)；用實例 mask 的輪廓監督，不把 RGB 陰影線當 GT。","textChars":63,"textLines":1,"bbox":[70,558,1141,47]}
+{"kind":"textbox","id":"sh/4nap4j6p","slide":2,"name":"overlap-detail","text":"交集  q(D∩R) = σ(zD)σ(zR)；只在真交疊影像啟用，D 不必伴隨 R。","textPreview":"交集  q(D∩R) = σ(zD)σ(zR)；只在真交疊影像啟用，D 不必伴隨 R。","textChars":43,"textLines":1,"bbox":[70,606,1141,42]}
+{"kind":"textbox","id":"sh/jm18bep4","slide":2,"name":"risk-detail","text":"驗證重點：陰影／亮部 D recall、D+R 重疊、R precision、純陰影誤報；雙視角增加計算與顯存。","textPreview":"驗證重點：陰影／亮部 D recall、D+R 重疊、R precision、純陰影誤報；雙視角增加計算與顯存。","textChars":56,"textLines":1,"bbox":[70,654,1141,36]}
+{"kind":"table","id":"tb/r658nydo","slide":2,"name":"","rows":8,"cols":6,"preview":"YAML 版本 | 雙視角 | 一致性 | 邊界 | 真 D∩R | 主要研究問題","bbox":[68,168,1144,373]}
+{"kind":"notes","id":"nt/9ai8bu","slide":2,"text":"七版來源：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-*.yaml。邊界與交集來源：ultralytics/utils/training_aux_ops.py；訓練 loss 插入位置：ultralytics/utils/training_aux_0918.py。原有共存權重來源：ultralytics/utils/loss.py。這些是機制與待驗證假說，尚無真實資料集效益數據。"}

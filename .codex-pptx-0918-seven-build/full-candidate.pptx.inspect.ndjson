@@ -1,0 +1,25 @@
+{"kind":"deck","id":"pr/9axfdn","name":"Deck"}
+{"kind":"layout","layoutId":"df31fd1f-f3ad-439f-8a5a-dff87444754f","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"cf3f2cf2-7bb0-45ad-a2e9-568012ea52fc","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/6tbh4i","slide":1,"title":"Full：陰影、邊界與 D／R 真交集","textShapes":13}
+{"kind":"textbox","id":"sh/7ipsvil4","slide":1,"name":"title","text":"Full：陰影、邊界與 D／R 真交集","textPreview":"Full：陰影、邊界與 D／R 真交集","textChars":19,"textLines":1,"bbox":[68,43,1136,63]}
+{"kind":"textbox","id":"sh/sjy9onmp","slide":1,"name":"subtitle","text":"雙視角監督 + 一致性 0.2 + 邊界 0.1 + 真交集 0.2","textPreview":"雙視角監督 + 一致性 0.2 + 邊界 0.1 + 真交集 0.2","textChars":34,"textLines":1,"bbox":[70,109,1130,35]}
+{"kind":"textbox","id":"sh/tk7axs3a","slide":1,"name":"step-0","text":"1  原圖與合成陰影共用 GT","textPreview":"1  原圖與合成陰影共用 GT","textChars":15,"textLines":1,"bbox":[70,178,685,34]}
+{"kind":"textbox","id":"sh/ulgbqd4v","slide":1,"name":"formula-0","text":"x̃ = clip[x·(1 − aσ(d / 0.15)), 0, 1]","textPreview":"x̃ = clip[x·(1 − aσ(d / 0.15)), 0, 1]","textChars":37,"textLines":1,"bbox":[73,219,685,48]}
+{"kind":"textbox","id":"sh/fmpszilg","slide":1,"name":"explain-0","text":"陰影改光度，不改 D、R 的實例 mask 與位置。","textPreview":"陰影改光度，不改 D、R 的實例 mask 與位置。","textChars":26,"textLines":1,"bbox":[73,271,684,48]}
+{"kind":"textbox","id":"sh/gnytsnm1","slide":1,"name":"step-1","text":"2  每個視角加入形狀與交集","textPreview":"2  每個視角加入形狀與交集","textChars":14,"textLines":1,"bbox":[70,329,685,34]}
+{"kind":"textbox","id":"sh/ho7a1s3m","slide":1,"name":"formula-1","text":"LA = L₀ + 0.1 LB + 0.2 LO","textPreview":"LA = L₀ + 0.1 LB + 0.2 LO","textChars":25,"textLines":1,"bbox":[73,370,685,48]}
+{"kind":"textbox","id":"sh/2p0bux4r","slide":1,"name":"explain-1","text":"LB 約束實例輪廓；LO 只監督真 D/R 交集圖片。","textPreview":"LB 約束實例輪廓；LO 只監督真 D/R 交集圖片。","textChars":27,"textLines":1,"bbox":[73,422,684,48]}
+{"kind":"textbox","id":"sh/3q9s32lc","slide":1,"name":"step-2","text":"3  可信原圖約束陰影視角","textPreview":"3  可信原圖約束陰影視角","textChars":13,"textLines":1,"bbox":[70,480,685,34]}
+{"kind":"textbox","id":"sh/raxgrmlk","slide":1,"name":"formula-2","text":"Lfull = ½[LA(x)+LA(x̃)] + 0.2 LC","textPreview":"Lfull = ½[LA(x)+LA(x̃)] + 0.2 LC","textChars":32,"textLines":1,"bbox":[73,521,685,48]}
+{"kind":"textbox","id":"sh/q9ozihkz","slide":1,"name":"explain-2","text":"LC 在五尺度上前背景分組平均，原圖 teacher stop-gradient。","textPreview":"LC 在五尺度上前背景分組平均，原圖 teacher stop-gradient。","textChars":41,"textLines":1,"bbox":[73,573,684,48]}
+{"kind":"textbox","id":"sh/cb6hkr25","slide":1,"name":"photo-caption","text":"0912 推論示例（非 GT）","textPreview":"0912 推論示例（非 GT）","textChars":15,"textLines":1,"bbox":[803,510,405,27]}
+{"kind":"textbox","id":"sh/3mdgn2lo","slide":1,"name":"callout","text":"三種新增目標都只在訓練期作用，推論仍使用同一 0912 計算圖。","textPreview":"三種新增目標都只在訓練期作用，推論仍使用同一 0912 計算圖。","textChars":32,"textLines":1,"bbox":[802,562,408,96]}
+{"kind":"image","id":"im/m1cj6pkj","slide":1,"name":"","alt":"使用者提供的 0912 貨櫃損傷推論示例，含陰影區域及 D、R 預測標記","bbox":[802,192,410,308]}
+{"kind":"notes","id":"nt/6tbh4i","slide":1,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-full.yaml。數學與訓練流程來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。圖片為使用者提供的 0912 推論疊圖，不是 GT，也不是本次七版的測試結果。"}
+{"kind":"slide","id":"sl/znc0m1","slide":2,"title":"Full：陰影、邊界與 D／R 真交集：影響與驗證","textShapes":3}
+{"kind":"textbox","id":"sh/dgfeh4na","slide":2,"name":"title","text":"Full：陰影、邊界與 D／R 真交集：影響與驗證","textPreview":"Full：陰影、邊界與 D／R 真交集：影響與驗證","textChars":25,"textLines":1,"bbox":[68,43,1136,62]}
+{"kind":"textbox","id":"sh/qd4v6p4z","slide":2,"name":"subtitle","text":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textPreview":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textChars":34,"textLines":1,"bbox":[70,109,1130,37]}
+{"kind":"textbox","id":"sh/4rmd4zmt","slide":2,"name":"footer","text":"所有新增 gain 都是起始超參數。以同一 0912 權重各自初始化七版，不能接續訓練。","textPreview":"所有新增 gain 都是起始超參數。以同一 0912 權重各自初始化七版，不能接續訓練。","textChars":44,"textLines":1,"bbox":[70,628,1135,61]}
+{"kind":"table","id":"tb/i50jy18f","slide":2,"name":"","rows":4,"cols":2,"preview":"影像辨識作用 | 同時約束光照穩定性、實例幾何和 D／R 同像素共存，檢驗三者是否互補。","bbox":[69,171,1142,432]}
+{"kind":"notes","id":"nt/znc0m1","slide":2,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-full.yaml。機制來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。所有改善敘述均為待驗證假說，目前沒有完整真實貨櫃資料集的七版結果。"}

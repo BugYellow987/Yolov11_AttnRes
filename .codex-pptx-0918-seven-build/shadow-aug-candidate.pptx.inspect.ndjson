@@ -1,0 +1,25 @@
+{"kind":"deck","id":"pr/1u18cu","name":"Deck"}
+{"kind":"layout","layoutId":"4e73421f-776b-4b1d-9430-fc23cd33455d","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"2989555b-5117-4dc4-8ad6-26e4d1449001","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/vvbk08","slide":1,"title":"Shadow Aug：合成陰影雙視角","textShapes":13}
+{"kind":"textbox","id":"sh/z2pwnmps","slide":1,"name":"title","text":"Shadow Aug：合成陰影雙視角","textPreview":"Shadow Aug：合成陰影雙視角","textChars":18,"textLines":1,"bbox":[68,43,1136,63]}
+{"kind":"textbox","id":"sh/03yxgrqx","slide":1,"name":"subtitle","text":"僅增加陰影影像與 GT 監督；一致性 gain = 0","textPreview":"僅增加陰影影像與 GT 監督；一致性 gain = 0","textChars":27,"textLines":1,"bbox":[70,109,1130,35]}
+{"kind":"textbox","id":"sh/147epw7i","slide":1,"name":"step-0","text":"1  隨機柔邊半平面","textPreview":"1  隨機柔邊半平面","textChars":10,"textLines":1,"bbox":[70,178,685,34]}
+{"kind":"textbox","id":"sh/qxwfah8v","slide":1,"name":"formula-0","text":"d(u) = r sinφ + c cosφ − o","textPreview":"d(u) = r sinφ + c cosφ − o","textChars":26,"textLines":1,"bbox":[73,219,685,48]}
+{"kind":"textbox","id":"sh/ry5wj29g","slide":1,"name":"explain-0","text":"方向 φ 與偏移 o 各圖獨立取樣，r、c 為正規化座標。","textPreview":"方向 φ 與偏移 o 各圖獨立取樣，r、c 為正規化座標。","textChars":29,"textLines":1,"bbox":[73,271,684,48]}
+{"kind":"textbox","id":"sh/czexc7q1","slide":1,"name":"step-1","text":"2  光度變換，幾何不變","textPreview":"2  光度變換，幾何不變","textChars":12,"textLines":1,"bbox":[70,329,685,34]}
+{"kind":"textbox","id":"sh/d0nelc7m","slide":1,"name":"formula-1","text":"x̃ = clip[x·(1 − aσ(d / 0.15)), 0, 1]","textPreview":"x̃ = clip[x·(1 − aσ(d / 0.15)), 0, 1]","textChars":37,"textLines":1,"bbox":[73,370,685,48]}
+{"kind":"textbox","id":"sh/29wf6x8z","slide":1,"name":"explain-1","text":"a ∈ [0.15, 0.45]；RGB 同比例變暗，mask 與 bbox 保持原標註。","textPreview":"a ∈ [0.15, 0.45]；RGB 同比例變暗，mask 與 bbox 保持原標註。","textChars":45,"textLines":1,"bbox":[73,422,684,48]}
+{"kind":"textbox","id":"sh/3a5wf29k","slide":1,"name":"step-2","text":"3  原圖與陰影圖都做 GT 監督","textPreview":"3  原圖與陰影圖都做 GT 監督","textChars":17,"textLines":1,"bbox":[70,480,685,34]}
+{"kind":"textbox","id":"sh/7alwr2l4","slide":1,"name":"formula-2","text":"Lpair = ½[L₀(x,Y) + L₀(x̃,Y)]","textPreview":"Lpair = ½[L₀(x,Y) + L₀(x̃,Y)]","textChars":29,"textLines":1,"bbox":[73,521,685,48]}
+{"kind":"textbox","id":"sh/69cvyx4j","slide":1,"name":"explain-2","text":"同一模型一次 forward 處理 2B 個視角，兩視角 loss 取平均。","textPreview":"同一模型一次 forward 處理 2B 個視角，兩視角 loss 取平均。","textChars":38,"textLines":1,"bbox":[73,573,684,48]}
+{"kind":"textbox","id":"sh/8bud07mp","slide":1,"name":"photo-caption","text":"0912 推論示例（非 GT）","textPreview":"0912 推論示例（非 GT）","textChars":15,"textLines":1,"bbox":[803,510,405,27]}
+{"kind":"textbox","id":"sh/velwv2l0","slide":1,"name":"callout","text":"此版回答：陰影曝光本身能否改善暗處 D，尚未加入一致性。","textPreview":"此版回答：陰影曝光本身能否改善暗處 D，尚未加入一致性。","textChars":28,"textLines":1,"bbox":[802,562,408,96]}
+{"kind":"image","id":"im/6tg7a94n","slide":1,"name":"","alt":"使用者提供的 0912 貨櫃損傷推論示例，含陰影區域及 D、R 預測標記","bbox":[802,192,410,308]}
+{"kind":"notes","id":"nt/vvbk08","slide":1,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-shadow-aug.yaml。數學與訓練流程來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。圖片為使用者提供的 0912 推論疊圖，不是 GT，也不是本次七版的測試結果。"}
+{"kind":"slide","id":"sl/968q2e","slide":2,"title":"Shadow Aug：合成陰影雙視角：影響與驗證","textShapes":3}
+{"kind":"textbox","id":"sh/d0fe1wby","slide":2,"name":"title","text":"Shadow Aug：合成陰影雙視角：影響與驗證","textPreview":"Shadow Aug：合成陰影雙視角：影響與驗證","textChars":24,"textLines":1,"bbox":[68,43,1136,62]}
+{"kind":"textbox","id":"sh/qdovq1s7","slide":2,"name":"subtitle","text":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textPreview":"研究目標是辨識陰影中的損傷。此模型沒有輸出陰影類別或陰影 mask。","textChars":34,"textLines":1,"bbox":[70,109,1130,37]}
+{"kind":"textbox","id":"sh/03qdwba9","slide":2,"name":"footer","text":"本版不使用陰影 mask 作目標，也不新增陰影類別輸出。","textPreview":"本版不使用陰影 mask 作目標，也不新增陰影類別輸出。","textChars":28,"textLines":1,"bbox":[70,628,1135,61]}
+{"kind":"table","id":"tb/utkrypsn","slide":2,"name":"","rows":4,"cols":2,"preview":"影像辨識作用 | 相同破損幾何搭配不同亮度，使模型少依賴暗度單一線索。陰影區 D 標籤不變。","bbox":[69,171,1142,432]}
+{"kind":"notes","id":"nt/968q2e","slide":2,"text":"對應 YAML：ultralytics/cfg/models/11_myself/yolo11-10csar-dr-trainonly-0918-shadow-aug.yaml。機制來源：ultralytics/utils/training_aux_ops.py、ultralytics/utils/training_aux_0918.py、ultralytics/utils/loss.py。所有改善敘述均為待驗證假說，目前沒有完整真實貨櫃資料集的七版結果。"}
