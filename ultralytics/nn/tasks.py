@@ -53,6 +53,7 @@ from ultralytics.nn.modules import (
     Conv2,
     ConvTranspose,
     Detect,
+    DamageSemanticAttention,
     DWConv,
     DWConvTranspose2d,
     FSAttentionResiduals,
@@ -1821,6 +1822,9 @@ def parse_model(d, ch, verbose=True):
             args = [ch[f]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
+        elif m is DamageSemanticAttention:
+            c2 = ch[f]  # enhanced feature keeps input channels; Index declares the separate nc logits
+            args = [c2, *args]
         elif m in {CSAR, MultiStateCSAR, MSAT, MSATMultiLabel, CrossScaleAttention, PatchCSAR, SCA, FSNetShuffle}:
             c2 = args[0]
             if c2 != nc:

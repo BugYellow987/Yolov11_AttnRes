@@ -111,6 +111,7 @@ from .head import (
     YOLOESegment26,
     v10Detect,
 )
+from .damage_semantic import DamageSemanticAttention
 from .shadow_dent import Segment26MultiLabelShadow, ShadowIIMStem
 from .dent_boundary import Segment26MultiLabelBoundary
 from .transformer import (
@@ -185,6 +186,7 @@ __all__ = (
     "DeformableTransformerDecoder",
     "DeformableTransformerDecoderLayer",
     "Detect",
+    "DamageSemanticAttention",
     "Focus",
     "GhostBottleneck",
     "GhostConv",

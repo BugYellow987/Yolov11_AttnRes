@@ -655,7 +655,7 @@ class v8SegmentationLoss(v8DetectionLoss):
 
 
 class v8MultiLabelSegmentationLoss(v8SegmentationLoss):
-    """Segmentation loss with state-derived multi-label supervision for overlapping damage classes."""
+    """Segmentation loss with auxiliary multi-label supervision for overlapping damage classes."""
 
     def __init__(
         self,
@@ -667,7 +667,7 @@ class v8MultiLabelSegmentationLoss(v8SegmentationLoss):
         super().__init__(model, tal_topk, tal_topk2)
         if self.overlap:
             raise ValueError(
-                "MSAT multi-label co-occurrence training requires overlap_mask=False so overlapping instance masks "
+                "Multi-label co-occurrence training requires overlap_mask=False so overlapping instance masks "
                 "remain independently available."
             )
         head = model.model[-1]
@@ -689,7 +689,7 @@ class v8MultiLabelSegmentationLoss(v8SegmentationLoss):
         batch_indices = batch["batch_idx"].view(-1).to(self.device).long()
         if masks.ndim != 3 or masks.shape[0] != classes.numel():
             raise ValueError(
-                "MSAT multi-label targets require one binary mask per instance; train with overlap_mask=False."
+                "Multi-label targets require one binary mask per instance; train with overlap_mask=False."
             )
         if not masks.shape[0]:
             return target
@@ -717,12 +717,12 @@ class v8MultiLabelSegmentationLoss(v8SegmentationLoss):
         return 0.5 * weighted_bce + 0.5 * self.multilabel_dice(logits, target)
 
     def loss(self, preds: dict[str, torch.Tensor], batch: dict[str, torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
-        """Add state-derived multi-label co-occurrence loss to the semantic loss slot."""
+        """Add auxiliary multi-label co-occurrence loss to the semantic loss slot."""
         scaled_loss, detached_loss = super().loss(preds, batch)
         batch_size = preds["boxes"].shape[0]
         auxiliary_logits = preds.get("multilabel_logits")
         if not auxiliary_logits:
-            raise RuntimeError("Segment26MultiLabel did not receive explicit MSATMultiLabel auxiliary logits.")
+            raise RuntimeError("Segment26MultiLabel did not receive explicit multi-label auxiliary logits.")
         auxiliary_loss = torch.zeros((), device=self.device)
         for logits in auxiliary_logits:
             target = self.build_multilabel_target(batch, batch_size, logits.shape[-2:], logits.dtype)

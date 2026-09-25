@@ -21,7 +21,7 @@ WEIGHT_SOURCES = [
     #r"C:\Users\USER\Downloads\best0907-10csar.pt",
     #r"C:\Users\USER\Downloads\best0907-p2.pt"
     #r"C:\Users\USER\Downloads\best0902-2.pt",
-    r"C:\Users\USER\Downloads\last0915-3.pt",  # Active baseline restored on 2026-09-18.
+    r"C:\Users\USER\Downloads\last0918-1.pt",  # Active baseline restored on 2026-09-18.
 ]
 
 # Image or image-directory paths
