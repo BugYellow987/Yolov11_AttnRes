@@ -1,0 +1,1636 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/y90nupkv",
+    "id": "y90nupkv",
+    "slide": 1,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light",
+        "eastAsianTypeface": "Calibri Light",
+        "complexScriptTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "Calibri",
+        "complexScriptTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "Noto Sans TC"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5sfepcfe",
+      "id": "15",
+      "name": "title",
+      "bbox": [
+        60,
+        35,
+        1160,
+        70
+      ],
+      "geometry": "rect",
+      "text": "語意 token 架構與陰影中的損傷線索",
+      "textPreview": "語意 token 架構與陰影中的損傷線索",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "語意 token 架構與陰影中的損傷線索"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "語意 token 架構與陰影中的損傷線索",
+          "resolvedTextStyle": {
+            "fontSize": 44,
+            "typeface": "Noto Sans TC",
+            "color": "#182E44",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "語意 token 架構與陰影中的損傷線索",
+              "fontSize": 44,
+              "typeface": "Noto Sans TC",
+              "color": "#182E44",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/547294r6",
+      "id": "2",
+      "name": "subtitle",
+      "bbox": [
+        62,
+        113,
+        1150,
+        42
+      ],
+      "geometry": "rect",
+      "text": "保留原 6CSAR，在四個尺度加入各損傷類別的獨立查詢",
+      "textPreview": "保留原 6CSAR，在四個尺度加入各損傷類別的獨立查詢",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "保留原 6CSAR，在四個尺度加入各損傷類別的獨立查詢"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "保留原 6CSAR，在四個尺度加入各損傷類別的獨立查詢",
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "保留原 6CSAR，在四個尺度加入各損傷類別的獨立查詢",
+              "fontSize": 25,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/k3yl0zql",
+      "id": "3",
+      "name": "layer-heading",
+      "bbox": [
+        62,
+        174,
+        552,
+        42
+      ],
+      "geometry": "rect",
+      "text": "新增層與原有特徵的對應",
+      "textPreview": "新增層與原有特徵的對應",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "新增層與原有特徵的對應"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "新增層與原有特徵的對應",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "typeface": "Noto Sans TC",
+            "color": "#006E77",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "新增層與原有特徵的對應",
+              "fontSize": 27,
+              "typeface": "Noto Sans TC",
+              "color": "#006E77",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "table",
+      "scope": "slide",
+      "aid": "tb/1s3i5w3a",
+      "id": "16",
+      "bbox": [
+        62,
+        225,
+        548,
+        250
+      ],
+      "text": "尺度 | 來源層 | Token 層 | 特徵 / logits\nP3 | 18 | 21 | 22 / 23\nP2 | 2 | 24 | 25 / 26\nP4 | 19 | 27 | 28 / 29\nP5 | 20 | 30 | 31 / 32",
+      "textPreview": "尺度 | 來源層 | Token 層 | 特徵 / logits | P3 | 18 | 21 | 22 / 23 | P2 | 2 | 24 | 25 / 26 | P4 | 19 | 27 | 28 / 29 | P5 | 20 | 30 | 31 / 32",
+      "rows": 5,
+      "cols": 4,
+      "cells": [
+        {
+          "index": 1,
+          "row": 1,
+          "column": 1,
+          "bbox": [
+            62,
+            225,
+            95,
+            50
+          ],
+          "text": "尺度",
+          "textPreview": "尺度",
+          "fillColor": "#182E44",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "尺度",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "尺度",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "column": 2,
+          "bbox": [
+            157,
+            225,
+            105,
+            50
+          ],
+          "text": "來源層",
+          "textPreview": "來源層",
+          "fillColor": "#182E44",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "來源層",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "來源層",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "row": 1,
+          "column": 3,
+          "bbox": [
+            262,
+            225,
+            132,
+            50
+          ],
+          "text": "Token 層",
+          "textPreview": "Token 層",
+          "fillColor": "#182E44",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Token 層",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Token 層",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "row": 1,
+          "column": 4,
+          "bbox": [
+            394,
+            225,
+            216,
+            50
+          ],
+          "text": "特徵 / logits",
+          "textPreview": "特徵 / logits",
+          "fillColor": "#182E44",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "特徵 / logits",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "特徵 / logits",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "row": 2,
+          "column": 1,
+          "bbox": [
+            62,
+            275,
+            95,
+            50
+          ],
+          "text": "P3",
+          "textPreview": "P3",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "P3",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "P3",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#006E77",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "row": 2,
+          "column": 2,
+          "bbox": [
+            157,
+            275,
+            105,
+            50
+          ],
+          "text": "18",
+          "textPreview": "18",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "18",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "18",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "row": 2,
+          "column": 3,
+          "bbox": [
+            262,
+            275,
+            132,
+            50
+          ],
+          "text": "21",
+          "textPreview": "21",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "21",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "21",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "row": 2,
+          "column": 4,
+          "bbox": [
+            394,
+            275,
+            216,
+            50
+          ],
+          "text": "22 / 23",
+          "textPreview": "22 / 23",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "22 / 23",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "22 / 23",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "row": 3,
+          "column": 1,
+          "bbox": [
+            62,
+            325,
+            95,
+            50
+          ],
+          "text": "P2",
+          "textPreview": "P2",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "P2",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "P2",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#006E77",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "row": 3,
+          "column": 2,
+          "bbox": [
+            157,
+            325,
+            105,
+            50
+          ],
+          "text": "2",
+          "textPreview": "2",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "2",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "2",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "row": 3,
+          "column": 3,
+          "bbox": [
+            262,
+            325,
+            132,
+            50
+          ],
+          "text": "24",
+          "textPreview": "24",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "24",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "24",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "row": 3,
+          "column": 4,
+          "bbox": [
+            394,
+            325,
+            216,
+            50
+          ],
+          "text": "25 / 26",
+          "textPreview": "25 / 26",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "25 / 26",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "25 / 26",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "row": 4,
+          "column": 1,
+          "bbox": [
+            62,
+            375,
+            95,
+            50
+          ],
+          "text": "P4",
+          "textPreview": "P4",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "P4",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "P4",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#006E77",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "row": 4,
+          "column": 2,
+          "bbox": [
+            157,
+            375,
+            105,
+            50
+          ],
+          "text": "19",
+          "textPreview": "19",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "19",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "19",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "row": 4,
+          "column": 3,
+          "bbox": [
+            262,
+            375,
+            132,
+            50
+          ],
+          "text": "27",
+          "textPreview": "27",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "27",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "27",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "row": 4,
+          "column": 4,
+          "bbox": [
+            394,
+            375,
+            216,
+            50
+          ],
+          "text": "28 / 29",
+          "textPreview": "28 / 29",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "28 / 29",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "28 / 29",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 17,
+          "row": 5,
+          "column": 1,
+          "bbox": [
+            62,
+            425,
+            95,
+            50
+          ],
+          "text": "P5",
+          "textPreview": "P5",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "P5",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "P5",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#006E77",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 18,
+          "row": 5,
+          "column": 2,
+          "bbox": [
+            157,
+            425,
+            105,
+            50
+          ],
+          "text": "20",
+          "textPreview": "20",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "20",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "20",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 19,
+          "row": 5,
+          "column": 3,
+          "bbox": [
+            262,
+            425,
+            132,
+            50
+          ],
+          "text": "30",
+          "textPreview": "30",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "30",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "30",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "row": 5,
+          "column": 4,
+          "bbox": [
+            394,
+            425,
+            216,
+            50
+          ],
+          "text": "31 / 32",
+          "textPreview": "31 / 32",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "31 / 32",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "31 / 32",
+                  "fontSize": 24,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/65g3298r",
+      "id": "5",
+      "name": "layer-context",
+      "bbox": [
+        63,
+        490,
+        550,
+        111
+      ],
+      "geometry": "rect",
+      "text": "第 0–20 層沿用原模型\nP2 是原有淺層捷徑，保留局部細節\n第 33 層整合強化特徵與多標籤 logits",
+      "textPreview": "第 0–20 層沿用原模型 | P2 是原有淺層捷徑，保留局部細節 | 第 33 層整合強化特徵與多標籤 logits",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "第 0–20 層沿用原模型"
+          },
+          {
+            "index": 2,
+            "text": "P2 是原有淺層捷徑，保留局部細節"
+          },
+          {
+            "index": 3,
+            "text": "第 33 層整合強化特徵與多標籤 logits"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "第 0–20 層沿用原模型",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "第 0–20 層沿用原模型",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "P2 是原有淺層捷徑，保留局部細節",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "P2 是原有淺層捷徑，保留局部細節",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "第 33 層整合強化特徵與多標籤 logits",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "第 33 層整合強化特徵與多標籤 logits",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ts7md4r2",
+      "id": "6",
+      "name": "math-heading",
+      "bbox": [
+        670,
+        174,
+        547,
+        42
+      ],
+      "geometry": "rect",
+      "text": "類別查詢與語意特徵回饋",
+      "textPreview": "類別查詢與語意特徵回饋",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "類別查詢與語意特徵回饋"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "類別查詢與語意特徵回饋",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "typeface": "Noto Sans TC",
+            "color": "#006E77",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "類別查詢與語意特徵回饋",
+              "fontSize": 27,
+              "typeface": "Noto Sans TC",
+              "color": "#006E77",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sryl4zqx",
+      "id": "7",
+      "name": "attention-equation",
+      "bbox": [
+        670,
+        224,
+        550,
+        52
+      ],
+      "geometry": "rect",
+      "text": "A = softmax空間(QKᵀ / √32)",
+      "textPreview": "A = softmax空間(QKᵀ / √32)",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "A = softmax空間(QKᵀ / √32)"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "A = softmax空間(QKᵀ / √32)",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Noto Sans TC",
+            "color": "#182E44",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "A = softmax空間(QKᵀ / √32)",
+              "fontSize": 30,
+              "typeface": "Noto Sans TC",
+              "color": "#182E44",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fu94fe98",
+      "id": "8",
+      "name": "attention-meaning",
+      "bbox": [
+        670,
+        284,
+        548,
+        72
+      ],
+      "geometry": "rect",
+      "text": "Q 來自損傷 token，K / V 來自影像\n4 heads，各 32 維，T′ 為更新後的 token",
+      "textPreview": "Q 來自損傷 token，K / V 來自影像 | 4 heads，各 32 維，T′ 為更新後的 token",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Q 來自損傷 token，K / V 來自影像"
+          },
+          {
+            "index": 2,
+            "text": "4 heads，各 32 維，T′ 為更新後的 token"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Q 來自損傷 token，K / V 來自影像",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Q 來自損傷 token，K / V 來自影像",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "4 heads，各 32 維，T′ 為更新後的 token",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "4 heads，各 32 維，T′ 為更新後的 token",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/utg3698n",
+      "id": "9",
+      "name": "response-equation",
+      "bbox": [
+        670,
+        363,
+        548,
+        50
+      ],
+      "geometry": "rect",
+      "text": "R = σ(Q′K′ᵀ / √128 + b)",
+      "textPreview": "R = σ(Q′K′ᵀ / √128 + b)",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "R = σ(Q′K′ᵀ / √128 + b)"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "R = σ(Q′K′ᵀ / √128 + b)",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Noto Sans TC",
+            "color": "#182E44",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "R = σ(Q′K′ᵀ / √128 + b)",
+              "fontSize": 30,
+              "typeface": "Noto Sans TC",
+              "color": "#182E44",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wn6dc7eh",
+      "id": "10",
+      "name": "response-meaning",
+      "bbox": [
+        670,
+        418,
+        548,
+        72
+      ],
+      "geometry": "rect",
+      "text": "Q′、K′ 為 token 與視覺的再投影\n每類各自取 sigmoid，同位置可同時高分",
+      "textPreview": "Q′、K′ 為 token 與視覺的再投影 | 每類各自取 sigmoid，同位置可同時高分",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Q′、K′ 為 token 與視覺的再投影"
+          },
+          {
+            "index": 2,
+            "text": "每類各自取 sigmoid，同位置可同時高分"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Q′、K′ 為 token 與視覺的再投影",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Q′、K′ 為 token 與視覺的再投影",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "每類各自取 sigmoid，同位置可同時高分",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "每類各自取 sigmoid，同位置可同時高分",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hofulsf2",
+      "id": "11",
+      "name": "residual-equation",
+      "bbox": [
+        670,
+        492,
+        548,
+        45
+      ],
+      "geometry": "rect",
+      "text": "X̂ = X + α P[(RᵀVₜ) / K]",
+      "textPreview": "X̂ = X + α P[(RᵀVₜ) / K]",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "X̂ = X + α P[(RᵀVₜ) / K]"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "X̂ = X + α P[(RᵀVₜ) / K]",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Noto Sans TC",
+            "color": "#182E44",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "X̂ = X + α P[(RᵀVₜ) / K]",
+              "fontSize": 30,
+              "typeface": "Noto Sans TC",
+              "color": "#182E44",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ul4vaxgb",
+      "id": "12",
+      "name": "residual-meaning",
+      "bbox": [
+        670,
+        540,
+        548,
+        66
+      ],
+      "geometry": "rect",
+      "text": "Vₜ：token 投影　P：輸出投影\nK：類別數　α 初值：0.001",
+      "textPreview": "Vₜ：token 投影　P：輸出投影 | K：類別數　α 初值：0.001",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Vₜ：token 投影　P：輸出投影"
+          },
+          {
+            "index": 2,
+            "text": "K：類別數　α 初值：0.001"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Vₜ：token 投影　P：輸出投影",
+          "resolvedTextStyle": {
+            "fontSize": 22.69,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Vₜ：token 投影　P：輸出投影",
+              "fontSize": 22.69,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "K：類別數　α 初值：0.001",
+          "resolvedTextStyle": {
+            "fontSize": 22.69,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "K：類別數　α 初值：0.001",
+              "fontSize": 22.69,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vmdcj2xw",
+      "id": "13",
+      "name": "shadow-takeaway",
+      "bbox": [
+        62,
+        614,
+        1155,
+        42
+      ],
+      "geometry": "rect",
+      "text": "陰影主軸：P2 細節與類別上下文，可能幫助暗處損傷辨識",
+      "textPreview": "陰影主軸：P2 細節與類別上下文，可能幫助暗處損傷辨識",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "陰影主軸：P2 細節與類別上下文，可能幫助暗處損傷辨識"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "陰影主軸：P2 細節與類別上下文，可能幫助暗處損傷辨識",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "typeface": "Noto Sans TC",
+            "color": "#006E77",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "陰影主軸：P2 細節與類別上下文，可能幫助暗處損傷辨識",
+              "fontSize": 27,
+              "typeface": "Noto Sans TC",
+              "color": "#006E77",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4r6dg7et",
+      "id": "14",
+      "name": "shadow-limitation",
+      "bbox": [
+        62,
+        661,
+        1128,
+        36
+      ],
+      "geometry": "rect",
+      "text": "此版使用可學習類別 token，沒有文字編碼器或陰影專用監督；成效待實驗驗證。",
+      "textPreview": "此版使用可學習類別 token，沒有文字編碼器或陰影專用監督；成效待實驗驗證。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "此版使用可學習類別 token，沒有文字編碼器或陰影專用監督；成效待實驗驗證。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "此版使用可學習類別 token，沒有文字編碼器或陰影專用監督；成效待實驗驗證。",
+          "resolvedTextStyle": {
+            "fontSize": 22.69,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "此版使用可學習類別 token，沒有文字編碼器或陰影專用監督；成效待實驗驗證。",
+              "fontSize": 22.69,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

@@ -1,5 +1,5 @@
 # Ultralytics AGPL-3.0 License - https://ultralytics.com/license
-"""YAML-selected training constraints for the unchanged 0912 segmentation inference graph."""
+"""YAML-selected training constraints that preserve the segmentation inference graph."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import torch.nn.functional as F
 
 from ultralytics.utils import LOGGER
 
+from .damage_extent import instance_extent_loss
 from .loss import v8MultiLabelSegmentationLoss
 from .ops import crop_mask
 from .training_aux_ops import consistency_loss, overlap_pair_loss, shadow_view, soft_boundary
@@ -23,6 +24,7 @@ def parse_training_aux(value):
         "shadow": {"enabled": False, "strength": [0.15, 0.45], "probability": 1.0, "softness": 0.15},
         "consistency": {"gain": 0.0, "confidence": 0.7},
         "boundary": {"gain": 0.0},
+        "extent": {"gain": 0.0, "fn_weight": 0.7, "margin": 1.0},
         "overlap": {"gain": 0.0, "pairs": [["D", "R"]]},
     }
     if not isinstance(value, dict):
@@ -57,8 +59,12 @@ def parse_training_aux(value):
         raise ValueError("shadow.strength minimum exceeds maximum.")
     number(shadow["probability"], "shadow.probability", upper=1)
     number(shadow["softness"], "shadow.softness", lower=1e-4, upper=1)
-    for key in ("consistency", "boundary", "overlap"):
+    for key in ("consistency", "boundary", "overlap", "extent"):
         number(config[key]["gain"], f"{key}.gain")
+    number(config["extent"]["fn_weight"], "extent.fn_weight", upper=1, upper_inclusive=False)
+    if config["extent"]["fn_weight"] == 0:
+        raise ValueError("extent.fn_weight must be strictly between 0 and 1.")
+    number(config["extent"]["margin"], "extent.margin")
     number(config["consistency"]["confidence"], "consistency.confidence", lower=0.5, upper=1, upper_inclusive=False)
     if config["consistency"]["gain"] and not shadow["enabled"]:
         raise ValueError("Consistency requires training_aux.shadow.enabled: true for paired views.")
@@ -94,10 +100,10 @@ def resolve_overlap_pairs(pairs, names, nc):
 
 
 class TrainingAuxSegmentationLoss(v8MultiLabelSegmentationLoss):
-    """Original multi-label objective plus opt-in instance boundaries and true-overlap constraints.
+    """Original multi-label objective plus opt-in instance extent, boundary, and overlap constraints.
 
     No model references, trainable modules, running teachers, or cached graph tensors are stored here.
-    Boundary terms join seg_loss; overlap and paired-view consistency join sem_loss. Validation
+    Extent and boundary terms join seg_loss; overlap and paired-view consistency join sem_loss. Validation
     uses the original seven-term objective, without the new training-only regularizers.
     """
 
@@ -105,6 +111,7 @@ class TrainingAuxSegmentationLoss(v8MultiLabelSegmentationLoss):
         super().__init__(model, tal_topk, tal_topk2)
         self.config = parse_training_aux(model.yaml["training_aux"])
         self.boundary_gain = self.config["boundary"]["gain"]
+        self.extent_gain = self.config["extent"]["gain"]
         self.overlap_gain = self.config["overlap"]["gain"]
         self.pairs = (
             resolve_overlap_pairs(self.config["overlap"]["pairs"], model.names, self.nc) if self.overlap_gain else []
@@ -113,17 +120,24 @@ class TrainingAuxSegmentationLoss(v8MultiLabelSegmentationLoss):
         LOGGER.info(
             f"0918 training-only constraints: shadow={self.config['shadow']['enabled']}, "
             f"consistency={self.config['consistency']['gain']}, boundary={self.boundary_gain}, "
-            f"overlap={self.overlap_gain}. Inference graph is unchanged."
+            f"overlap={self.overlap_gain}, extent={self.extent_gain}. Inference graph is unchanged."
         )
 
     def single_mask_loss(self, gt_mask, pred, proto, xyxy, area):
         """Regularize matched INSTANCE masks, so touching same-class boundaries are representable."""
         standard = super().single_mask_loss(gt_mask, pred, proto, xyxy, area)
-        if not self._training_terms or not self.boundary_gain:
+        if not self._training_terms or not (self.boundary_gain or self.extent_gain):
             return standard
         with torch.autocast(device_type=proto.device.type, enabled=False):
             logits = torch.einsum("in,nhw->ihw", pred.float(), proto.float())
             target = gt_mask.float()
+            if self.extent_gain:
+                settings = self.config["extent"]
+                standard = standard + self.extent_gain * instance_extent_loss(
+                    logits, target, xyxy, settings["fn_weight"], settings["margin"]
+                )
+            if not self.boundary_gain:
+                return standard
             predicted_edges = soft_boundary(logits.sigmoid()[:, None])[:, 0]
             target_edges = soft_boundary(target[:, None])[:, 0]
             # Compute morphology before cropping; include the outside edge of each matched box.

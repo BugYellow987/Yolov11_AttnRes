@@ -1,0 +1,33 @@
+# Supply data=<verified segmentation data.yaml> and pretrained=<same starting checkpoint> on CLI.
+# Numbers 05 and 06 are separate comparisons against 04, not mandatory warm-start stages.
+task: segment
+mode: train
+model: ultralytics/cfg/models/11_myself/yolo11-6csar-extent-0928-06-detail960.yaml
+epochs: 200
+patience: 0
+batch: 4
+imgsz: 960
+seed: 928
+deterministic: true
+optimizer: AdamW
+lr0: 0.0003
+lrf: 0.1
+cos_lr: true
+mosaic: 0.0
+mixup: 0.0
+copy_paste: 0.0
+close_mosaic: 0
+scale: 0.2
+translate: 0.05
+hsv_v: 0.2
+overlap_mask: false
+mask_ratio: 4
+compile: false
+resume: false
+amp: false
+val: true
+save: true
+save_period: 20
+plots: true
+project: runs/damage_extent_0928
+name: damage-extent-0928-06-detail960

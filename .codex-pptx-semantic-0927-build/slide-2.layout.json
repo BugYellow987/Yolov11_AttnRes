@@ -1,0 +1,1180 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/hwbqtkby",
+    "id": "hwbqtkby",
+    "slide": 2,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light",
+        "eastAsianTypeface": "Calibri Light",
+        "complexScriptTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "Calibri",
+        "complexScriptTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "Noto Sans TC"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nu58f2hs",
+      "id": "13",
+      "name": "title",
+      "bbox": [
+        60,
+        35,
+        1160,
+        70
+      ],
+      "geometry": "rect",
+      "text": "重疊損傷的監督與辨識影響",
+      "textPreview": "重疊損傷的監督與辨識影響",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "重疊損傷的監督與辨識影響"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "重疊損傷的監督與辨識影響",
+          "resolvedTextStyle": {
+            "fontSize": 44,
+            "typeface": "Noto Sans TC",
+            "color": "#182E44",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "重疊損傷的監督與辨識影響",
+              "fontSize": 44,
+              "typeface": "Noto Sans TC",
+              "color": "#182E44",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9072xkry",
+      "id": "2",
+      "name": "subtitle",
+      "bbox": [
+        62,
+        113,
+        1150,
+        42
+      ],
+      "geometry": "rect",
+      "text": "同一位置可同時保留 Rust 與 Dent 的正標籤",
+      "textPreview": "同一位置可同時保留 Rust 與 Dent 的正標籤",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "同一位置可同時保留 Rust 與 Dent 的正標籤"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "同一位置可同時保留 Rust 與 Dent 的正標籤",
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "同一位置可同時保留 Rust 與 Dent 的正標籤",
+              "fontSize": 25,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ozy1ofad",
+      "id": "3",
+      "name": "response-heading",
+      "bbox": [
+        62,
+        174,
+        545,
+        42
+      ],
+      "geometry": "rect",
+      "text": "獨立 response 與 multi-hot 真值",
+      "textPreview": "獨立 response 與 multi-hot 真值",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "獨立 response 與 multi-hot 真值"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "獨立 response 與 multi-hot 真值",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "typeface": "Noto Sans TC",
+            "color": "#006E77",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "獨立 response 與 multi-hot 真值",
+              "fontSize": 27,
+              "typeface": "Noto Sans TC",
+              "color": "#006E77",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/b29kza94",
+      "id": "4",
+      "name": "response-example",
+      "bbox": [
+        62,
+        228,
+        555,
+        48
+      ],
+      "geometry": "rect",
+      "text": "σ(2) = 0.881　σ(1.5) = 0.818",
+      "textPreview": "σ(2) = 0.881　σ(1.5) = 0.818",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "σ(2) = 0.881　σ(1.5) = 0.818"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "σ(2) = 0.881　σ(1.5) = 0.818",
+          "resolvedTextStyle": {
+            "fontSize": 29,
+            "typeface": "Noto Sans TC",
+            "color": "#182E44",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "σ(2) = 0.881　σ(1.5) = 0.818",
+              "fontSize": 29,
+              "typeface": "Noto Sans TC",
+              "color": "#182E44",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/a10jqpsj",
+      "id": "5",
+      "name": "response-example-meaning",
+      "bbox": [
+        62,
+        286,
+        555,
+        72
+      ],
+      "geometry": "rect",
+      "text": "重疊位置的 (Rust, Dent) 真值為 (1, 1)\n兩類都可高分，示例數值並非訓練結果",
+      "textPreview": "重疊位置的 (Rust, Dent) 真值為 (1, 1) | 兩類都可高分，示例數值並非訓練結果",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "重疊位置的 (Rust, Dent) 真值為 (1, 1)"
+          },
+          {
+            "index": 2,
+            "text": "兩類都可高分，示例數值並非訓練結果"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "重疊位置的 (Rust, Dent) 真值為 (1, 1)",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "重疊位置的 (Rust, Dent) 真值為 (1, 1)",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "兩類都可高分，示例數值並非訓練結果",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "兩類都可高分，示例數值並非訓練結果",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x4r21kru",
+      "id": "6",
+      "name": "loss-heading",
+      "bbox": [
+        660,
+        174,
+        560,
+        42
+      ],
+      "geometry": "rect",
+      "text": "共存區域加權，四尺度等權平均",
+      "textPreview": "共存區域加權，四尺度等權平均",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "共存區域加權，四尺度等權平均"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "共存區域加權，四尺度等權平均",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "typeface": "Noto Sans TC",
+            "color": "#006E77",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "共存區域加權，四尺度等權平均",
+              "fontSize": 27,
+              "typeface": "Noto Sans TC",
+              "color": "#006E77",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w3i1sfa9",
+      "id": "7",
+      "name": "overlap-equation",
+      "bbox": [
+        660,
+        226,
+        558,
+        46
+      ],
+      "geometry": "rect",
+      "text": "w = 1 + 2 × 1[ΣₖYₖ > 1]",
+      "textPreview": "w = 1 + 2 × 1[ΣₖYₖ > 1]",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "w = 1 + 2 × 1[ΣₖYₖ > 1]"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "w = 1 + 2 × 1[ΣₖYₖ > 1]",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Noto Sans TC",
+            "color": "#182E44",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "w = 1 + 2 × 1[ΣₖYₖ > 1]",
+              "fontSize": 28,
+              "typeface": "Noto Sans TC",
+              "color": "#182E44",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r65knqtk",
+      "id": "8",
+      "name": "loss-equation",
+      "bbox": [
+        660,
+        278,
+        558,
+        42
+      ],
+      "geometry": "rect",
+      "text": "Laux = 0.5 × mean尺度(0.5 LwBCE + 0.5 LDice)",
+      "textPreview": "Laux = 0.5 × mean尺度(0.5 LwBCE + 0.5 LDice)",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Laux = 0.5 × mean尺度(0.5 LwBCE + 0.5 LDice)"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Laux = 0.5 × mean尺度(0.5 LwBCE + 0.5 LDice)",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#182E44",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Laux = 0.5 × mean尺度(0.5 LwBCE + 0.5 LDice)",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#182E44",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q5wjelsz",
+      "id": "9",
+      "name": "loss-explanation",
+      "bbox": [
+        660,
+        324,
+        558,
+        38
+      ],
+      "geometry": "rect",
+      "text": "BCE 的相對權重為 3:1，Dice 不另加權",
+      "textPreview": "BCE 的相對權重為 3:1，Dice 不另加權",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "BCE 的相對權重為 3:1，Dice 不另加權"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "BCE 的相對權重為 3:1，Dice 不另加權",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "BCE 的相對權重為 3:1，Dice 不另加權",
+              "fontSize": 23,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "table",
+      "scope": "slide",
+      "aid": "tb/b2l0nqpw",
+      "id": "14",
+      "bbox": [
+        62,
+        384,
+        1156,
+        220
+      ],
+      "text": "情境 | 本版作用 | 需驗證的影響\n陰影內損傷 | P2 細節與 token 上下文 | 暗處 recall、純陰影誤報\nRust + Dent 重疊 | multi-hot 與加權多標籤 loss | 配對 recall、非重疊區誤報\n最終框與 masks | 語意特徵送回 YOLO head | assignment、NMS 仍可能漏類",
+      "textPreview": "情境 | 本版作用 | 需驗證的影響 | 陰影內損傷 | P2 細節與 token 上下文 | 暗處 recall、純陰影誤報 | Rust + Dent 重疊 | multi-hot 與加權多標籤 loss | 配對 recall、非重疊區誤報 | 最終框與 masks ...",
+      "rows": 4,
+      "cols": 3,
+      "cells": [
+        {
+          "index": 1,
+          "row": 1,
+          "column": 1,
+          "bbox": [
+            62,
+            384,
+            218,
+            55
+          ],
+          "text": "情境",
+          "textPreview": "情境",
+          "fillColor": "#182E44",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "情境",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "情境",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "column": 2,
+          "bbox": [
+            280,
+            384,
+            449,
+            55
+          ],
+          "text": "本版作用",
+          "textPreview": "本版作用",
+          "fillColor": "#182E44",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "本版作用",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "本版作用",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "row": 1,
+          "column": 3,
+          "bbox": [
+            729,
+            384,
+            489,
+            55
+          ],
+          "text": "需驗證的影響",
+          "textPreview": "需驗證的影響",
+          "fillColor": "#182E44",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "需驗證的影響",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "需驗證的影響",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "row": 2,
+          "column": 1,
+          "bbox": [
+            62,
+            439,
+            218,
+            55
+          ],
+          "text": "陰影內損傷",
+          "textPreview": "陰影內損傷",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "陰影內損傷",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "陰影內損傷",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#006E77",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "row": 2,
+          "column": 2,
+          "bbox": [
+            280,
+            439,
+            449,
+            55
+          ],
+          "text": "P2 細節與 token 上下文",
+          "textPreview": "P2 細節與 token 上下文",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "P2 細節與 token 上下文",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "P2 細節與 token 上下文",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "row": 2,
+          "column": 3,
+          "bbox": [
+            729,
+            439,
+            489,
+            55
+          ],
+          "text": "暗處 recall、純陰影誤報",
+          "textPreview": "暗處 recall、純陰影誤報",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "暗處 recall、純陰影誤報",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "暗處 recall、純陰影誤報",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "row": 3,
+          "column": 1,
+          "bbox": [
+            62,
+            494,
+            218,
+            55
+          ],
+          "text": "Rust + Dent 重疊",
+          "textPreview": "Rust + Dent 重疊",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Rust + Dent 重疊",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Rust + Dent 重疊",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#006E77",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "row": 3,
+          "column": 2,
+          "bbox": [
+            280,
+            494,
+            449,
+            55
+          ],
+          "text": "multi-hot 與加權多標籤 loss",
+          "textPreview": "multi-hot 與加權多標籤 loss",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "multi-hot 與加權多標籤 loss",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "multi-hot 與加權多標籤 loss",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "row": 3,
+          "column": 3,
+          "bbox": [
+            729,
+            494,
+            489,
+            55
+          ],
+          "text": "配對 recall、非重疊區誤報",
+          "textPreview": "配對 recall、非重疊區誤報",
+          "fillColor": "#EFF4F6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "配對 recall、非重疊區誤報",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "配對 recall、非重疊區誤報",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "row": 4,
+          "column": 1,
+          "bbox": [
+            62,
+            549,
+            218,
+            55
+          ],
+          "text": "最終框與 masks",
+          "textPreview": "最終框與 masks",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "最終框與 masks",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "最終框與 masks",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#006E77",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "row": 4,
+          "column": 2,
+          "bbox": [
+            280,
+            549,
+            449,
+            55
+          ],
+          "text": "語意特徵送回 YOLO head",
+          "textPreview": "語意特徵送回 YOLO head",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "語意特徵送回 YOLO head",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "語意特徵送回 YOLO head",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "row": 4,
+          "column": 3,
+          "bbox": [
+            729,
+            549,
+            489,
+            55
+          ],
+          "text": "assignment、NMS 仍可能漏類",
+          "textPreview": "assignment、NMS 仍可能漏類",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "assignment、NMS 仍可能漏類",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "assignment、NMS 仍可能漏類",
+                  "fontSize": 23,
+                  "typeface": "Noto Sans TC",
+                  "color": "#182E44"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9wnqhczy",
+      "id": "11",
+      "name": "training",
+      "bbox": [
+        62,
+        626,
+        1148,
+        39
+      ],
+      "geometry": "rect",
+      "text": "訓練設定：overlap_mask=False，mask_ratio=4",
+      "textPreview": "訓練設定：overlap_mask=False，mask_ratio=4",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "訓練設定：overlap_mask=False，mask_ratio=4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "訓練設定：overlap_mask=False，mask_ratio=4",
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "typeface": "Noto Sans TC",
+            "color": "#006E77",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "訓練設定：overlap_mask=False，mask_ratio=4",
+              "fontSize": 25,
+              "typeface": "Noto Sans TC",
+              "color": "#006E77",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mtwrmxg7",
+      "id": "12",
+      "name": "cost",
+      "bbox": [
+        62,
+        669,
+        1150,
+        33
+      ],
+      "geometry": "rect",
+      "text": "n、3 類參數：5.53M 增至 6.30M（+13.9%）。尚無此版精度增益數據。",
+      "textPreview": "n、3 類參數：5.53M 增至 6.30M（+13.9%）。尚無此版精度增益數據。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "n、3 類參數：5.53M 增至 6.30M（+13.9%）。尚無此版精度增益數據。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "n、3 類參數：5.53M 增至 6.30M（+13.9%）。尚無此版精度增益數據。",
+          "resolvedTextStyle": {
+            "fontSize": 22.69,
+            "typeface": "Noto Sans TC",
+            "color": "#4C5D6D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "n、3 類參數：5.53M 增至 6.30M（+13.9%）。尚無此版精度增益數據。",
+              "fontSize": 22.69,
+              "typeface": "Noto Sans TC",
+              "color": "#4C5D6D"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}
