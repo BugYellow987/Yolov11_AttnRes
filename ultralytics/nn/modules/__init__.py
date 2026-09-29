@@ -114,6 +114,7 @@ from .head import (
 from .damage_semantic import DamageSemanticAttention
 from .shadow_dent import Segment26MultiLabelShadow, ShadowIIMStem
 from .dent_boundary import Segment26MultiLabelBoundary
+from .damage_architecture import LuminanceResidualStem, Segment26MultiLabelExtent
 from .transformer import (
     AIFI,
     MLP,
@@ -187,6 +188,8 @@ __all__ = (
     "DeformableTransformerDecoderLayer",
     "Detect",
     "DamageSemanticAttention",
+    "LuminanceResidualStem",
+    "Segment26MultiLabelExtent",
     "Focus",
     "GhostBottleneck",
     "GhostConv",

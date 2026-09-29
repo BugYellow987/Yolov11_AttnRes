@@ -1,0 +1,33 @@
+# Architecture comparison: use the same verified data and starting checkpoint for every run.
+# Supply data=... and pretrained=... at execution; new branch weights require training.
+task: segment
+mode: train
+model: ultralytics/cfg/models/11_myself/yolo11-6csar-arch-0929-02-shallow.yaml
+epochs: 200
+patience: 0
+batch: 4
+imgsz: 640
+seed: 928
+deterministic: true
+optimizer: AdamW
+lr0: 0.0003
+lrf: 0.1
+cos_lr: true
+mosaic: 0.0
+mixup: 0.0
+copy_paste: 0.0
+close_mosaic: 0
+scale: 0.2
+translate: 0.05
+hsv_v: 0.2
+overlap_mask: false
+mask_ratio: 4
+compile: false
+resume: false
+amp: false
+val: true
+save: true
+save_period: 20
+plots: true
+project: runs/damage_arch_0929
+name: damage-arch-0929-02-shallow
