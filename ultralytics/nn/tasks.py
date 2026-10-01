@@ -8,7 +8,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from ultralytics.nn.autobackend import check_class_names
 from ultralytics.nn.modules import (
@@ -18,10 +18,14 @@ from ultralytics.nn.modules import (
     C2PSA,
     C3,
     C3TR,
+    CSAR,
     ELAN1,
+    MSAT,
     OBB,
     OBB26,
     PSA,
+    SCA,
+    SETA,
     SPP,
     SPPELAN,
     SPPF,
@@ -29,7 +33,6 @@ from ultralytics.nn.modules import (
     AConv,
     ADown,
     AttentionResiduals,
-    SETA,
     Bottleneck,
     BottleneckCSP,
     C2f,
@@ -41,31 +44,29 @@ from ultralytics.nn.modules import (
     C3x,
     CBFuse,
     CBLinear,
-    CSAR,
-    MultiStateCSAR,
-    MSAT,
-    MSATMultiLabel,
-    CrossScaleAttention,
-    PatchCSAR,
     Classify,
     Concat,
     Conv,
     Conv2,
     ConvTranspose,
+    CrossScaleAttention,
     Detect,
     DWConv,
     DWConvTranspose2d,
+    Focus,
     FSAttentionResiduals,
     FSNetShuffle,
-    Focus,
     GhostBottleneck,
     GhostConv,
-    IIMStem,
     HGBlock,
     HGStem,
+    IIMStem,
     ImagePoolingAttn,
     Index,
     LRPCHead,
+    MSATMultiLabel,
+    MultiStateCSAR,
+    PatchCSAR,
     Pose,
     Pose26,
     RepC3,
@@ -78,7 +79,6 @@ from ultralytics.nn.modules import (
     Segment,
     Segment26,
     Segment26MultiLabel,
-    SCA,
     SemanticSegment,
     TorchVision,
     WorldDetect,
@@ -95,10 +95,10 @@ from ultralytics.utils.loss import (
     SemanticSegmentationLoss,
     v8ClassificationLoss,
     v8DetectionLoss,
+    v8MultiLabelSegmentationLoss,
     v8OBBLoss,
     v8PoseLoss,
     v8SegmentationLoss,
-    v8MultiLabelSegmentationLoss,
 )
 from ultralytics.utils.ops import make_divisible
 from ultralytics.utils.patches import torch_load
@@ -596,9 +596,7 @@ class SegmentationModel(DetectionModel):
     def init_criterion(self):
         """Initialize the loss criterion for the SegmentationModel."""
         loss_class = (
-            v8MultiLabelSegmentationLoss
-            if isinstance(self.model[-1], Segment26MultiLabel)
-            else v8SegmentationLoss
+            v8MultiLabelSegmentationLoss if isinstance(self.model[-1], Segment26MultiLabel) else v8SegmentationLoss
         )
         return E2ELoss(self, loss_class) if getattr(self, "end2end", False) else loss_class(self)
 
@@ -1474,11 +1472,9 @@ class SafeClass:
 
     def __init__(self, *args, **kwargs):
         """Initialize SafeClass instance, ignoring all arguments."""
-        pass
 
     def __call__(self, *args, **kwargs):
         """Run SafeClass instance, ignoring all arguments."""
-        pass
 
 
 class SafeUnpickler(pickle.Unpickler):
