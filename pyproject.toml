@@ -135,7 +135,7 @@ export = [
 ]
 solutions = [
     "shapely>=2.0.0",    # shapely for point and polygon data matching
-    "lap>=0.5.12",  # for solution tracking linear assignment
+    "lap>=0.5.13",  # for solution tracking linear assignment
     "faiss-cpu",  # for similarity search
     "openai-clip>=1.0.1",  # for similarity search text/image embeddings
     "setuptools>=80.0.0,<81.0.0; python_version >= '3.9'",  # openai-clip imports pkg_resources.packaging, removed in setuptools>=81
