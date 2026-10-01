@@ -34,26 +34,26 @@ OUTPUT_PROJECT="${OUTPUT_PROJECT:-${PROJECT_ROOT}/runs/segment}"
 RUN_NAME="${RUN_NAME:-yolo11-6csar-iim}"
 
 if [[ -z "${DATA_YAML}" ]]; then
-    echo "Error: missing dataset YAML."
-    echo "Usage: bash tools/train_yolo11_6csar_iim.sh /absolute/path/to/data.yaml"
-    exit 2
+  echo "Error: missing dataset YAML."
+  echo "Usage: bash tools/train_yolo11_6csar_iim.sh /absolute/path/to/data.yaml"
+  exit 2
 fi
 
 if [[ ! -f "${DATA_YAML}" ]]; then
-    echo "Error: dataset YAML not found: ${DATA_YAML}"
-    exit 2
+  echo "Error: dataset YAML not found: ${DATA_YAML}"
+  exit 2
 fi
 DATA_YAML="$(cd -- "$(dirname -- "${DATA_YAML}")" && pwd)/$(basename -- "${DATA_YAML}")"
 
 if [[ ! -f "${MODEL_YAML}" ]]; then
-    echo "Error: model YAML not found: ${MODEL_YAML}"
-    exit 2
+  echo "Error: model YAML not found: ${MODEL_YAML}"
+  exit 2
 fi
 
-if ! command -v yolo >/dev/null 2>&1; then
-    echo "Error: 'yolo' is not available in PATH."
-    echo "Activate the training environment and run: python -m pip install -e '${PROJECT_ROOT}'"
-    exit 127
+if ! command -v yolo > /dev/null 2>&1; then
+  echo "Error: 'yolo' is not available in PATH."
+  echo "Activate the training environment and run: python -m pip install -e '${PROJECT_ROOT}'"
+  exit 127
 fi
 
 mkdir -p "${OUTPUT_PROJECT}"
@@ -66,14 +66,14 @@ echo "Device:  ${DEVICE}"
 echo "Run:     ${OUTPUT_PROJECT}/${RUN_NAME}"
 
 exec yolo segment train \
-    model="${MODEL_YAML}" \
-    data="${DATA_YAML}" \
-    imgsz="${IMGSZ}" \
-    epochs="${EPOCHS}" \
-    batch="${BATCH}" \
-    device="${DEVICE}" \
-    workers="${WORKERS}" \
-    patience="${PATIENCE}" \
-    amp="${AMP}" \
-    project="${OUTPUT_PROJECT}" \
-    name="${RUN_NAME}"
+  model="${MODEL_YAML}" \
+  data="${DATA_YAML}" \
+  imgsz="${IMGSZ}" \
+  epochs="${EPOCHS}" \
+  batch="${BATCH}" \
+  device="${DEVICE}" \
+  workers="${WORKERS}" \
+  patience="${PATIENCE}" \
+  amp="${AMP}" \
+  project="${OUTPUT_PROJECT}" \
+  name="${RUN_NAME}"
