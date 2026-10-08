@@ -68,10 +68,22 @@ def safe_name(value: str) -> str:
 def class_color(class_id: int) -> tuple[int, int, int]:
     """Return a stable BGR color for a class ID."""
     palette_rgb = (
-        (255, 56, 56), (255, 157, 151), (255, 112, 31), (255, 178, 29),
-        (207, 210, 49), (72, 249, 10), (146, 204, 23), (61, 219, 134),
-        (26, 147, 52), (0, 212, 187), (44, 153, 168), (0, 194, 255),
-        (52, 69, 147), (100, 115, 255), (0, 24, 236), (132, 56, 255),
+        (255, 56, 56),
+        (255, 157, 151),
+        (255, 112, 31),
+        (255, 178, 29),
+        (207, 210, 49),
+        (72, 249, 10),
+        (146, 204, 23),
+        (61, 219, 134),
+        (26, 147, 52),
+        (0, 212, 187),
+        (44, 153, 168),
+        (0, 194, 255),
+        (52, 69, 147),
+        (100, 115, 255),
+        (0, 24, 236),
+        (132, 56, 255),
     )
     red, green, blue = palette_rgb[class_id % len(palette_rgb)]
     return blue, green, red
@@ -127,9 +139,7 @@ def draw_predictions(
         label = f"{float(score):.2f}"
         font_scale = max(0.45, min(image.shape[:2]) / 1000.0)
         thickness = max(1, args.line_width - 1)
-        (text_width, text_height), baseline = cv2.getTextSize(
-            label, cv2.FONT_HERSHEY_SIMPLEX, font_scale, thickness
-        )
+        (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, font_scale, thickness)
         label_x = max(0, min(x1, output.shape[1] - text_width - 7))
         label_y = max(text_height + baseline + 5, y1)
         cv2.rectangle(
